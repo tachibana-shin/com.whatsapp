@@ -1,0 +1,20 @@
+{
+  "name": "com.whatsapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@desislavsd/vue-teleport": "^0.1.2",
+    "core-js": "^3.9.1",
+    "nuxt": "^2.15.3",
+    "vue-web-cam": "^1.9.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.11.3"
+  }
+}
