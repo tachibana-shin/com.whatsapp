@@ -1,20 +1,25 @@
 <template>
-  <v-teleport to="root">
-    <v-card flat color="transparent" class="web-cam-fixed">
-      <div class="camera">
-        <video class="preview" ref="preview">Video stream not available.</video>
-        <canvas ref="canvas"></canvas>
+  <div>
+    <v-teleport to="fab" />
+    <v-teleport to="root">
+      <v-card flat color="transparent" class="web-cam-fixed">
+        <div class="camera">
+          <video class="preview" ref="preview">
+            Video stream not available.
+          </video>
+          <canvas ref="canvas"></canvas>
 
-        <v-layout class="buttons">
-<v-flex>
-  <v-btn icon>
-<v-icon></v-icon>
-  </v-btn>
-</v-flex>
-        </v-layout>
-      </div>
-    </v-card>
-  </v-teleport>
+          <v-layout class="buttons">
+            <v-flex>
+              <v-btn icon>
+                <v-icon></v-icon>
+              </v-btn>
+            </v-flex>
+          </v-layout>
+        </div>
+      </v-card>
+    </v-teleport>
+  </div>
 </template>
 
 <script>

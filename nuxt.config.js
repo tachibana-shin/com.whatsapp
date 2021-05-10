@@ -1,6 +1,9 @@
 import colors from "vuetify/es5/util/colors";
 
 export default {
+  router: {
+    middleware: "meta"
+  },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: "%s - com.whatsapp",
@@ -48,7 +51,8 @@ export default {
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,
           success: colors.green.accent3,
-          white: "#ffffff"
+          white: "#ffffff",
+          "green-main": "#075e55"
         }
       }
     }

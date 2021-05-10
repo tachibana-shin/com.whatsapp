@@ -1,6 +1,12 @@
 <template>
   <v-app dark>
-    <v-app-bar app fixed height="56px" color="#075e55">
+    <v-app-bar
+      app
+      fixed
+      height="56px"
+      color="green-main"
+      v-show="!$store.state.meta || $store.state.meta.navbar !== false"
+    >
       <v-app-bar-title> WhatsApp </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn icon>
@@ -58,13 +64,21 @@
         </v-tabs>
       </template>
     </v-app-bar>
-    <v-main>
-      <v-container>
-          <nuxt />
+    <v-main fill-height>
+      <v-container fill-height>
+        <nuxt />
       </v-container>
     </v-main>
 
     <v-teleport-location name="root" />
-    <v-teleport-location name="fab" />
+    <v-teleport-location name="fab" class="fab" />
   </v-app>
 </template>
+
+<style lang="scss" scoped>
+.fab {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
+</style>

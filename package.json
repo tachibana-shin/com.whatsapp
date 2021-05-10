@@ -12,6 +12,7 @@
     "@desislavsd/vue-teleport": "^0.1.2",
     "core-js": "^3.9.1",
     "nuxt": "^2.15.3",
+    "v-emoji-picker": "^2.3.3",
     "vue-web-cam": "^1.9.0"
   },
   "devDependencies": {
