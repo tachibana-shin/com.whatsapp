@@ -5,7 +5,7 @@
       fixed
       height="56px"
       color="green-main"
-      v-show="!$store.state.meta || $store.state.meta.navbar !== false"
+      v-if="!$store.state.meta || $store.state.meta.navbar !== false"
     >
       <v-app-bar-title> WhatsApp </v-app-bar-title>
       <v-spacer></v-spacer>
@@ -70,14 +70,30 @@
       </v-container>
     </v-main>
 
-    <v-teleport-location name="root" />
-    <v-teleport-location name="fab" class="fab" />
+    <client-only>
+      <v-teleport-location name="root" />
+      <v-teleport-location name="fab" class="fab" />
+    </client-only>
+    <vue-toast-group />
   </v-app>
 </template>
 
+<script>
+import socketLogin from "~/helpers/socket-login";
+import socketOnline from "~/helpers/socket-online"
+
+export default {
+  fetchOnServer: false,
+  async fetch() {
+    socketLogin(this.$socket.client, this.$auth.strategy.token.get());
+    socketOnline(this.$socket.client)
+  }
+};
+</script>
+
 <style lang="scss" scoped>
 .fab {
-  position: fixed;
+  position: fixed; /// くるってる
   bottom: 0;
   right: 0;
 }

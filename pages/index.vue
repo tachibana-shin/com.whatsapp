@@ -1,8 +1,8 @@
 <template>
-  <v-card flat color="transparent">
+  <v-card flat color="transparent" class="fill-height">
     <app-invite-friends v-if="false" />
 
-    <app-list class="pa-0 mx-n2" />
+    <app-list class="pa-0 mx-n2" :list="list" />
 
     <v-teleport to="fab">
       <v-fab-transition>
@@ -22,6 +22,13 @@ export default {
   components: {
     AppInviteFriends,
     AppList
+  },
+  async asyncData({ $axios }) {
+    const { data } = await $axios.get("/chat");
+
+    return {
+      list: data
+    };
   }
 };
 </script>

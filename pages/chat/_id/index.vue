@@ -7,11 +7,13 @@
         <v-icon> mdi-arrow-left </v-icon>
       </v-btn>
       <v-avatar size="35px">
-        <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg"></v-img>
+        <v-img
+          :src="avatar || require(`~/assets/default-avatar-300x300.png`)"
+        ></v-img>
       </v-avatar>
       <nuxt-link
         tag="div"
-        to="/user/2"
+        :to="`/user/${id}`"
         class="ml-3 my-n1 d-flex flex-column justify-space-between"
         style="max-width: 300px; width: 100%; height: 100%; padding: 4px 0;"
         v-ripple
@@ -20,13 +22,13 @@
           class="font-weight-regular text--white text-truncate"
           style="font-size: 18px; line-height: 1"
         >
-          Michael Jackon
+          {{ name }}
         </div>
         <div
           class="font-weight-regular text-truncate status"
           style="font-size: 13.2px; line-height: 1; color: #e4e7f6; margin-top: 3px;"
         >
-          2:02 CH
+          {{ new Date(lastOnline).toLocaleTimeString() }}
         </div>
       </nuxt-link>
       <v-spacer></v-spacer>
@@ -102,24 +104,39 @@
       </client-only>
     </v-app-bar>
 
-    <div
-      class="chat--frame my-n3"
-      :style="{
-        'padding-bottom': `${keyboardHeight}px`
-      }"
-    >
+    <div class="chat--frame my-n3">
       <div class="time">12:10 CH</div>
-      <template v-for="item in ~~(100 + 1)">
+      <template
+        v-for="({ content, mysend, created, sended, readed },
+        index) in messages"
+      >
         <div
           class="message"
           :class="{
-            'my-message': item % 2 == 0
+            'my-message': mysend
           }"
-          :key="item"
+          :key="index"
         >
           <div class="message--inner">
-            <section class="inner">Hello {{ item }}</section>
-            <span class="time"> 11:54 SA </span>
+            <section class="inner">{{ content.body }}</section>
+            <span class="time">
+              {{ moment(created).format("hh:mm") }}
+              <v-icon
+                size="16"
+                class="ml-1"
+                v-if="mysend"
+                :color="readed ? `blue` : undefined"
+              >
+                {{
+                  sended
+                    ? readed
+                      ? "mdi-check-all"
+                      : "mdi-check"
+                    : "mdi-clock-outline"
+                }}
+              </v-icon>
+            </span>
+            <div class="clearfix"></div>
           </div>
         </div>
       </template>
@@ -170,6 +187,8 @@
                     ? `${$refs.textarea__inner.scrollHeight}px`
                     : undefined
               }"
+              @keydown.exact.enter.prevent.stop="onEnter"
+              @keydown.exact.enter.shift="onEnterShift"
             ></div>
             <label for="textarea" class="placeholder" v-show="!message">
               Nhập tin nhắn
@@ -177,7 +196,13 @@
           </div>
         </div>
         <div class="btn--send__slot">
-          <v-btn rounded dark color="green-main" class="btn">
+          <v-btn
+            rounded
+            dark
+            color="green-main"
+            class="btn"
+            @click="!!message ? sendMessage : () => {}"
+          >
             <v-scale-transition origin="center center" mode="out-in">
               <v-icon key="1" v-if="!message"> mdi-microphone </v-icon>
               <v-icon key="2" v-else> mdi-send </v-icon>
@@ -201,8 +226,8 @@
 
 <script>
 import { VEmojiPicker } from "v-emoji-picker";
-
-let keyboardHeight = 175;
+import moment from "moment";
+let idMessageSend = -1;
 
 export default {
   components: {
@@ -211,29 +236,112 @@ export default {
   meta: {
     navbar: false
   },
+  async asyncData({ $axios, params: { id } }) {
+    const {
+      data: { _id, name, avatar, lastOnline, messages }
+    } = await $axios.get(`/chat/${id}`);
+
+    return {
+      id,
+      name,
+      avatar,
+      lastOnline,
+      messages
+    };
+  },
   data() {
     return {
-      keyboardHeight,
       message: "",
       emojiPickerOn: false
     };
   },
-  mounted() {
-    if (process.isClient) {
-      window.addEventListener(
-        "load",
-        () => {
-          let height = innerHeight;
-
-          window.addEventListener("keydown", () => {
-            keyboardHeight = height - innerHeight;
-          });
-        },
-        {
-          once: true
-        }
-      );
+  computed: {
+    moment() {
+      return moment;
     }
+  },
+  sockets: {
+    "send message__SUCCESS"({ uid, _id }) {
+      const message = this.messages.find(item => item.uid === uid);
+
+      if (message) {
+        message.sended = true;
+        this.$delete(message, "uid");
+        this.$set(message, "_id", _id);
+      } else {
+        console.error(`${uid} not found`);
+      }
+    },
+    "send message__ERROR"(message) {
+      console.log("error", message);
+    },
+    "new message"(body) {
+      this.messages.push(Object.assign({}, body));
+      this.toEndPage();
+    },
+    "user online"({ _id, lastOnline }) {
+      if (this.id === _id) {
+        this.lastOnline = lastOnline;
+      }
+    }
+  },
+  methods: {
+    onEnter(event) {
+      event.preventDefault();
+      this.sendMessage();
+    },
+    onEnterShift(event) {},
+    toEndPage() {
+      this.$vuetify.goTo(document.body.scrollHeight, {
+        duration: 333,
+        easing: "linear"
+      });
+    },
+    sendMessage() {
+      if (!!this.message) {
+        const uid = ++idMessageSend;
+        const message = this.message
+          .replace(/<\/? ?br>/gi, "\n")
+          .replace(/^\s+|\s+$/g, "");
+        this.messages.push({
+          content: {
+            body: message
+          },
+          created: new Date().toISOString(),
+          mysend: true,
+          readed: false,
+          sended: false,
+          uid
+        });
+
+        this.$socket.client.emit("send message", {
+          id: this.id,
+          content: message,
+          uid
+        });
+
+        this.$refs.textarea__inner.innerHTML = "";
+        this.message = "";
+      }
+
+      this.toEndPage();
+
+      return false;
+    }
+  },
+  created() {
+    if (process.isClient) {
+      this.$socket.client.emit("subrice state user", this.id);
+      this.toEndPage();
+    }
+  },
+  beforeDestroy() {
+    if (process.isClient) {
+      this.$socket.client.emit("unsubrice state user", this.id);
+    }
+  },
+  mounted() {
+    this.toEndPage();
   }
 };
 </script>
@@ -273,6 +381,12 @@ export default {
 <style lang="scss" scoped>
 $width-triangle: 10px;
 
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
 .chat--frame {
   position: relative;
   z-index: 1;
@@ -294,6 +408,9 @@ $width-triangle: 10px;
     font-weight: 400;
     pointer-events: none;
     user-select: none;
+    &::v-deep > * {
+      color: inherit;
+    }
   }
 
   .message {
@@ -345,12 +462,15 @@ $width-triangle: 10px;
       color: #000;
       padding: 5px 10px;
       border-radius: 7px;
-      display: inline-flex;
-      justify-content: space-between;
+      display: inline-block;
+      text-align: left;
 
       .inner {
-        word-break: break-all;
+        word-break: break-word;
         font-weight: 400;
+        text-align: left;
+        white-space: pre-wrap;
+        display: inline;
       }
 
       .time {
@@ -360,6 +480,8 @@ $width-triangle: 10px;
         white-space: nowrap;
         height: auto;
         margin-left: 18px;
+        float: right;
+        line-height: 2;
       }
     }
 
@@ -388,6 +510,9 @@ $width-triangle: 10px;
 
     .message--inner {
       background-color: $background-color;
+    }
+    + .my-message {
+      margin-top: 4px;
     }
   }
 }

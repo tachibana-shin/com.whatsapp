@@ -1,26 +1,37 @@
 <template>
   <v-list color="transparent" two-line>
-    <v-list-item v-for="item in 10" :key="item" to="/chat">
+    <v-list-item  v-for="(item, index) in list" :key="index" :to="`/chat/${item._id}`">
       <v-list-item-avatar size="55px" style="overflow: visible">
-        <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg"> </v-img>
+        <v-img :src="item.avatar || require(`~/assets/default-avatar-300x300.png`)"> </v-img>
         <div class="addon" v-if="false">
           <v-icon size="15px"> mdi-plus </v-icon>
         </div>
       </v-list-item-avatar>
       <v-list-item-content class="ml-1">
         <v-list-item-title class="status-activity font-weight-medium">
-          Trạng thái của tôi
+          {{ item.name }}
         </v-list-item-title>
         <v-list-item-subtitle class="content-activity mt-1">
-          Nhấn để thêm cập nhật trạng thái
+          {{ item.lastMess }}
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action>
-        <span class="status-time"> 11:54 SA </span>
+        <span class="status-time"> {{ new Date(item.time).toLocaleTimeString() }} </span>
       </v-list-item-action>
     </v-list-item>
   </v-list>
 </template>
+
+<script>
+export default {
+  props: {
+    list: {
+      type: Array,
+      required: true
+    }
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 .status-activity {
