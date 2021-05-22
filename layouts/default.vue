@@ -6,6 +6,7 @@
       height="56px"
       color="green-main"
       v-if="!$store.state.meta || $store.state.meta.navbar !== false"
+      dark
     >
       <v-app-bar-title> WhatsApp </v-app-bar-title>
       <v-spacer></v-spacer>
@@ -80,13 +81,13 @@
 
 <script>
 import socketLogin from "~/helpers/socket-login";
-import socketOnline from "~/helpers/socket-online"
+import socketOnline from "~/helpers/socket-online";
 
 export default {
   fetchOnServer: false,
   async fetch() {
     socketLogin(this.$socket.client, this.$auth.strategy.token.get());
-    socketOnline(this.$socket.client)
+    socketOnline(this.$socket.client);
   }
 };
 </script>

@@ -2,19 +2,20 @@
   <v-card flat color="transparent" class="fill-height" width="100%">
     <div class="chat--background"></div>
 
-    <v-app-bar app fixed height="56px" color="green-main">
+    <v-app-bar app fixed height="56px" color="green-main" dark>
       <v-btn icon>
         <v-icon> mdi-arrow-left </v-icon>
       </v-btn>
       <v-avatar size="35px">
         <v-img
+          background-color="black"
           :src="avatar || require(`~/assets/default-avatar-300x300.png`)"
         ></v-img>
       </v-avatar>
       <nuxt-link
         tag="div"
         :to="`/user/${id}`"
-        class="ml-3 my-n1 d-flex flex-column justify-space-between"
+        class="ml-3 my-n1 d-flex flex-column justify-center"
         style="max-width: 300px; width: 100%; height: 100%; padding: 4px 0;"
         v-ripple
       >
@@ -28,7 +29,7 @@
           class="font-weight-regular text-truncate status"
           style="font-size: 13.2px; line-height: 1; color: #e4e7f6; margin-top: 3px;"
         >
-          {{ new Date(lastOnline).toLocaleTimeString() }}
+          {{ wroting ? "Đang trả lời" : new Date(lastOnline).toLocaleTimeString() }}
         </div>
       </nuxt-link>
       <v-spacer></v-spacer>
@@ -105,7 +106,27 @@
     </v-app-bar>
 
     <div class="chat--frame my-n3">
-      <div class="time">12:10 CH</div>
+      <client-only>
+        <vue-infinite-loading
+          direction="top"
+          @infinite="loadMoreOldMessage"
+          spinner="circles"
+        >
+          <span slot="no-more"></span>
+          <span slot="no-results"></span>
+        </vue-infinite-loading>
+      </client-only>
+
+      <div
+        class="time"
+        :style="{
+          color: $vuetify.theme.isDark
+            ? `rgba(255, 255, 255, 0.8)`
+            : `rgba(0, 0, 0, 0.8)`
+        }"
+      >
+        12:10 CH
+      </div>
       <template
         v-for="({ content, mysend, created, sended, readed },
         index) in messages"
@@ -116,10 +137,98 @@
             'my-message': mysend
           }"
           :key="index"
+          ref="message"
         >
           <div class="message--inner">
-            <section class="inner">{{ content.body }}</section>
-            <span class="time">
+            <section
+              class="inner file"
+              v-if="content.file"
+              :class="{
+                'other mb-0': isFileOther(content.file.type)
+              }"
+            >
+              <v-img
+                v-if="content.file.type.match(/image\//)"
+                :src="content.file.src"
+                :width="content.file.ratio < 1 ? 226 : 251"
+                :aspect-ratio="
+                  content.file.ratio < 1
+                    ? 226 / 316
+                    : Math.min(1, content.file.ratio)
+                "
+                background-color="black"
+                class="d-block"
+              />
+              <v-responsive
+                :aspect-ratio="
+                  content.file.ratio < 1 ? 226 / 316 : content.file.ratio
+                "
+                v-else-if="content.file.type.match(/video\//)"
+                width="100%"
+              >
+                <video
+                  :src="content.file.src"
+                  style="width: 100%; display: block"
+                  controls
+                ></video>
+              </v-responsive>
+              <audio
+                v-else-if="content.file.type.match(/audio\//)"
+                :src="content.file.src"
+                style="width: 100%; display: block"
+                controls
+              ></audio>
+              <div class="preview-file-other" v-else>
+                <div class="d-flex align-center">
+                  <div class="file--icon">
+                    <span
+                      class="fiv-viv"
+                      :class="[
+                        `fiv-icon-${
+                          existsIcon(extname(content.file.name))
+                            ? extname(content.file.name)
+                            : 'blank'
+                        }`
+                      ]"
+                    ></span>
+                  </div>
+                  <div class="file--name font-weight-regular ml-3">
+                    {{ content.file.name }}
+                  </div>
+                </div>
+
+                <div class="d-flex justify-space-between">
+                  <span
+                    class="time ml-0 text-uppercase"
+                    style="text-align: left; float: none"
+                  >
+                    {{ extname(content.file.name) }}
+                  </span>
+                  <span class="time" style="float: none">
+                    {{ moment(created).format("hh:mm") }}
+                    <v-icon
+                      size="16"
+                      class="ml-1"
+                      v-if="mysend"
+                      :color="readed ? `blue` : undefined"
+                    >
+                      {{
+                        sended
+                          ? readed
+                            ? "mdi-check-all"
+                            : "mdi-check"
+                          : "mdi-clock-outline"
+                      }}
+                    </v-icon>
+                  </span>
+                </div>
+              </div>
+            </section>
+            <section class="inner" v-else>{{ content.body }}</section>
+            <span
+              class="time"
+              v-if="!content.file || !isFileOther(content.file.type)"
+            >
               {{ moment(created).format("hh:mm") }}
               <v-icon
                 size="16"
@@ -170,7 +279,13 @@
                 </v-btn>
               </template>
             </v-menu>
-            <v-btn icon class="icon" v-show="!message" key="2">
+            <v-btn
+              icon
+              class="icon"
+              v-show="!messageReal"
+              key="2"
+              @click="selectImage"
+            >
               <v-icon> mdi-camera </v-icon>
             </v-btn>
           </transition-group>
@@ -183,12 +298,14 @@
               ref="textarea__inner"
               :style="{
                 height:
-                  !!message && $refs.textarea__inner
+                  !!messageReal && $refs.textarea__inner
                     ? `${$refs.textarea__inner.scrollHeight}px`
                     : undefined
               }"
               @keydown.exact.enter.prevent.stop="onEnter"
               @keydown.exact.enter.shift="onEnterShift"
+              @focus="onFocusEdit"
+              @blur="onBlurEdit"
             ></div>
             <label for="textarea" class="placeholder" v-show="!message">
               Nhập tin nhắn
@@ -201,7 +318,7 @@
             dark
             color="green-main"
             class="btn"
-            @click="!!message ? sendMessage : () => {}"
+            @click="!!message ? sendMessage() : void 0"
           >
             <v-scale-transition origin="center center" mode="out-in">
               <v-icon key="1" v-if="!message"> mdi-microphone </v-icon>
@@ -226,19 +343,89 @@
 
 <script>
 import { VEmojiPicker } from "v-emoji-picker";
+import FileToArrayBuffer from "file-to-array-buffer";
 import moment from "moment";
+import { socket } from "~/plugins/vue-socket.io-extended";
+import socketIOFileClient from "socket.io-file-client";
+import { extname } from "path";
+import VueInfiniteLoading from "vue-infinite-loading";
+import "file-icon-vectors/dist/file-icon-vivid.min.css";
+
+const uploader = new socketIOFileClient(socket);
+
+function isInViewport(element) {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+function sizeofImage(src) {
+  const img = new Image();
+  const promise = new Promise((resolve, reject) => {
+    img.addEventListener(
+      "load",
+      () => {
+        resolve({ width: img.width, height: img.height });
+      },
+      { once: true }
+    );
+    img.addEventListener(
+      "error",
+      () => {
+        reject("GET_SIZEOF_IMAGE_ERROR");
+      },
+      { once: true }
+    );
+
+    setTimeout(() => resolve({}), 60000);
+  });
+  img.src = src;
+
+  return promise;
+}
+function sizeofVideo(src) {
+  const img = document.createElement("video");
+  const promise = new Promise((resolve, reject) => {
+    img.addEventListener(
+      "loadedmetadata",
+      () => {
+        resolve({ width: img.videoWidth, height: img.videoHeight });
+      },
+      { once: true }
+    );
+    img.addEventListener(
+      "error",
+      () => {
+        reject("GET_SIZEOF_VIDEO_ERROR");
+      },
+      { once: true }
+    );
+
+    setTimeout(() => resolve({}), 60000);
+  });
+  img.src = src;
+
+  return promise;
+}
+let onScroll;
+
 let idMessageSend = -1;
 
 export default {
   components: {
-    VEmojiPicker
+    VEmojiPicker,
+    VueInfiniteLoading
   },
   meta: {
     navbar: false
   },
   async asyncData({ $axios, params: { id } }) {
     const {
-      data: { _id, name, avatar, lastOnline, messages }
+      data: { _id, name, avatar, lastOnline, messages = [] }
     } = await $axios.get(`/chat/${id}`);
 
     return {
@@ -246,7 +433,8 @@ export default {
       name,
       avatar,
       lastOnline,
-      messages
+      messages,
+      wroting: false
     };
   },
   data() {
@@ -258,16 +446,26 @@ export default {
   computed: {
     moment() {
       return moment;
+    },
+    messageReal() {
+      const message = decodeURIComponent(
+        this.message.replace(/<\/? ?br>/gi, "\n").replace(/^\s+|\s+$/g, "")
+      )
+        .replace(/&quot;/g, '"')
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&amp;/g, "&");
+      return message;
     }
   },
   sockets: {
-    "send message__SUCCESS"({ uid, _id }) {
+    "send message__SUCCESS"({ uid, idMessage }) {
       const message = this.messages.find(item => item.uid === uid);
 
       if (message) {
         message.sended = true;
         this.$delete(message, "uid");
-        this.$set(message, "_id", _id);
+        this.$set(message, "_id", idMessage);
       } else {
         console.error(`${uid} not found`);
       }
@@ -275,17 +473,70 @@ export default {
     "send message__ERROR"(message) {
       console.log("error", message);
     },
-    "new message"(body) {
-      this.messages.push(Object.assign({}, body));
-      this.toEndPage();
+    "new message"({ body } = {}) {
+      if (body) {
+        this.messages.push(Object.assign({}, body));
+        this.toEndPage();
+      }
     },
     "user online"({ _id, lastOnline }) {
       if (this.id === _id) {
         this.lastOnline = lastOnline;
       }
+    },
+    "readed message"(toId) {
+      this.readedMessageAfter(toId);
+    },
+    "enemy writing"(id) {
+      console.log(`writing ${id}`);
+      this.wroting = true;
+    },
+    "enemy writed"(id) {
+      console.log(`writed ${id}`);
+      this.wroting = false;
     }
   },
   methods: {
+    onFocusEdit() {
+      this.$socket.client.emit("focused", this.id);
+      console.log("focused");
+    },
+    onBlurEdit() {
+      this.$socket.client.emit("blured", this.id);
+      console.log("blured");
+    },
+    async loadMoreOldMessage({ loaded, complete }) {
+      // complete();
+      const {
+        data: { messages = [] }
+      } = await this.$axios.get(`/chat/${this.id}`, {
+        params: {
+          beforeId: this.messages[0]._id
+        }
+      });
+
+      if (messages.length === 0) {
+        complete();
+      } else {
+        this.messages.unshift(...messages);
+        loaded();
+      }
+    },
+    extname(path) {
+      return extname(path).replace(/^\./, "");
+    },
+    existsIcon(icon) {
+      try {
+        require(`file-icon-vectors/dist/icons/vivid/${icon}.svg`);
+
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    isFileOther(type) {
+      return !(type || ``).match(/(?:image|video|audio)\//);
+    },
     onEnter(event) {
       event.preventDefault();
       this.sendMessage();
@@ -298,11 +549,11 @@ export default {
       });
     },
     sendMessage() {
-      if (!!this.message) {
+      const message = this.messageReal;
+
+      if (message) {
         const uid = ++idMessageSend;
-        const message = this.message
-          .replace(/<\/? ?br>/gi, "\n")
-          .replace(/^\s+|\s+$/g, "");
+
         this.messages.push({
           content: {
             body: message
@@ -315,7 +566,7 @@ export default {
         });
 
         this.$socket.client.emit("send message", {
-          id: this.id,
+          _id: this.id,
           content: message,
           uid
         });
@@ -327,24 +578,219 @@ export default {
       this.toEndPage();
 
       return false;
+    },
+    readedMessageAfter(id) {
+      this.messages.some(message => {
+        if (message._id === id) {
+          return true;
+        }
+
+        if (message.mysend === true && message.readed === false) {
+          message.readed = true;
+        }
+      });
+    },
+    selectFile(accept) {
+      const input = document.createElement("input");
+      input.setAttribute("hidden", true);
+      input.setAttribute("type", "file");
+      input.setAttribute("accept", accept);
+
+      const promis = new Promise((resolve, reject) => {
+        input.addEventListener(
+          "change",
+          () => {
+            resolve(input.files);
+            input.remove();
+          },
+          { once: true }
+        );
+        input.addEventListener("blur", () => {
+          if (input.files.length === 0) {
+            reject();
+          }
+        });
+      });
+
+      document.body.appendChild(input);
+      input.click();
+
+      return promis;
+    },
+    toBase64(file) {
+      const reader = new FileReader();
+      const pro = new Promise((resolve, reject) => {
+        reader.addEventListener(
+          "load",
+          () => {
+            resolve(reader.result);
+          },
+          { once: true }
+        );
+        reader.addEventListener(
+          "error",
+          () => {
+            reject();
+          },
+          { once: true }
+        );
+      });
+
+      reader.readAsDataURL(file);
+
+      return pro;
+    },
+    toBlobFile(file) {
+      return URL.createObjectURL(file);
+    },
+    revokeBlob(blob) {
+      URL.revokeObjectURL(blob);
+    },
+    async selectImage() {
+      const files = await this.selectFile();
+      const blobFile = this.toBlobFile(files[0]);
+      const uid = ++idMessageSend;
+
+      const { name, type } = files[0];
+      let ratio;
+      if (type.match(/image\//)) {
+        /// image
+        const { width, height } = await sizeofImage(blobFile);
+        ratio = width / height;
+      } else if (type.match(/video\//)) {
+        /// video
+        const { width, height } = await sizeofVideo(blobFile);
+        ratio = width / height;
+      }
+
+      this.messages.push({
+        content: {
+          file: {
+            src: blobFile,
+            name,
+            type,
+            ...(ratio ? { ratio } : {})
+          }
+        },
+        created: new Date().toISOString(),
+        mysend: true,
+        readed: false,
+        sended: false,
+        uid
+      });
+
+      setTimeout(() => {
+        this.toEndPage();
+      }, 70);
+
+      uploader.upload(
+        { files },
+        {
+          data: {
+            _id: this.id,
+            uid
+          }
+        }
+      );
+
+      return;
+      this.$socket.client.emit("send message", {
+        _id: this.id,
+        file: {
+          buffer: await FileToArrayBuffer(files[0]),
+          name,
+          type
+        },
+        uid
+      });
     }
   },
   created() {
     if (process.isClient) {
-      this.$socket.client.emit("subrice state user", this.id);
+      this.$socket.client.emit("join to room 2 private", this.id);
       this.toEndPage();
     }
   },
   beforeDestroy() {
     if (process.isClient) {
-      this.$socket.client.emit("unsubrice state user", this.id);
+      this.$socket.client.emit("left join to room 2 private", this.id);
+      window.removeEventListener("scroll", onScroll);
+    }
+  },
+  updated() {
+    if (onScroll) {
+      onScroll();
     }
   },
   mounted() {
+    try {
+      document.execCommand("defaultParagraphSeparator", false, "br");
+    } catch (e) {
+      console.warn(`Browser not support default-paragraph-separator`);
+    }
     this.toEndPage();
+    window.addEventListener(
+      "scroll",
+      (onScroll = () => {
+        const refMessages = Array.isArray(this.$refs.message)
+          ? this.$refs.message
+          : [this.$refs.message];
+
+        refMessages.forEach((message, index) => {
+          if (isInViewport(message)) {
+            const { _id, mysend, readed } = this.messages[index];
+
+            if (mysend !== true && readed === false) {
+              this.$socket.client.emit("readed message", {
+                _id: this.id,
+                beforeId: _id
+              });
+
+              this.readedMessageAfter(_id);
+            }
+          }
+        });
+      })
+    );
+    onScroll();
+
+    uploader.on("start", function(fileInfo) {
+      console.log("Start uploading", fileInfo);
+    });
+    uploader.on("stream", function(fileInfo) {
+      console.log("Streaming... sent " + fileInfo.sent + " bytes.");
+    });
+    uploader.on("complete", function(fileInfo) {
+      console.log("Upload Complete", fileInfo);
+    });
+    uploader.on("error", function(err) {
+      console.log("Error!", err);
+    });
+    uploader.on("abort", function(fileInfo) {
+      console.log("Aborted: ", fileInfo);
+    });
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.preview-file-other {
+  min-width: 226px;
+  // height: 71px;
+
+  .fiv-viv {
+    font-size: 45px;
+  }
+
+  .file--name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 .chat--background {
@@ -471,6 +917,31 @@ $width-triangle: 10px;
         text-align: left;
         white-space: pre-wrap;
         display: inline;
+        &.file:not(.other) {
+          margin: -0 -5px;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+
+          + .time {
+            position: absolute;
+            bottom: 5px;
+            right: (5px + 5px);
+            color: #fff;
+            background-image: radial-gradient(
+              rgba(0, 0, 0, 0.33),
+              rgba(0, 0, 0, 0.27)
+            );
+            box-shadow: 0 0 20px 10px rgb(0 0 0 / 33%);
+          }
+        }
+        &.file.other {
+          overflow: hidden;
+          white-space: initial;
+          display: block;
+          overflow: hidden;
+          margin: (-5px + 11px) (-10px + 11px);
+        }
       }
 
       .time {
@@ -514,6 +985,12 @@ $width-triangle: 10px;
     + .my-message {
       margin-top: 4px;
     }
+  }
+}
+
+.chat--frame {
+  .enemy-wroting {
+    position: absolute;
   }
 }
 </style>
