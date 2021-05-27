@@ -5,6 +5,7 @@
     width="100%"
     max-width="450px"
     :loading="loading"
+    flat
   >
     <template v-slot:progress>
       <v-progress-linear
@@ -17,7 +18,7 @@
     </template>
     <v-card-text class="font-weight-regular mx-auto">
       <v-avatar class="d-block mx-auto" size="90px">
-        <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg"></v-img>
+        <v-img :src="require(`~/assets/icon.png`)"></v-img>
       </v-avatar>
 
       <v-form @submit.prevent="login" ref="formLogin">
@@ -42,7 +43,7 @@
           ></v-text-field>
         </div>
 
-        <div class="text-right font-weight-light text-caption">
+        <div class="text-right text-caption">
           <nuxt-link
             to="/forgotpasword"
             class="text-decoration-none"
@@ -61,6 +62,7 @@
             class="mx-auto"
             color="green-main"
             type="submit"
+            dark
           >
             Login
           </v-btn>
@@ -96,7 +98,7 @@
 
       <div
         style="margin-top: 14px"
-        class="text-center text-caption font-weight-light text--secondary"
+        class="text-center text-caption text--secondary"
       >
         <nuxt-link
           to="/register"
@@ -140,7 +142,7 @@ export default {
 
           await this.$auth.loginWith("local", {
             data: {
-              email: this.email,
+              username: this.email,
               password: this.password
             }
           });

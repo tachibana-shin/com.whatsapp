@@ -3,20 +3,15 @@
     <div class="chat--background"></div>
 
     <v-app-bar app fixed height="56px" color="green-main" dark>
-      <v-btn icon>
+      <v-btn icon @click="$router.back()">
         <v-icon> mdi-arrow-left </v-icon>
       </v-btn>
-      <v-avatar size="35px">
-        <v-img
-          background-color="black"
-          :src="avatar || require(`~/assets/default-avatar-300x300.png`)"
-        ></v-img>
-      </v-avatar>
+      <app-avatar :src="avatar" :online="isOnline" :size="37" />
       <nuxt-link
         tag="div"
         :to="`/user/${id}`"
         class="ml-3 my-n1 d-flex flex-column justify-center"
-        style="max-width: 300px; width: 100%; height: 100%; padding: 4px 0;"
+        style="max-width: 300px; width: 100%; height: 100%; padding: 4px 0"
         v-ripple
       >
         <div
@@ -27,21 +22,45 @@
         </div>
         <div
           class="font-weight-regular text-truncate status"
-          style="font-size: 13.2px; line-height: 1; color: #e4e7f6; margin-top: 3px;"
+          style="
+            font-size: 13.2px;
+            line-height: 1;
+            color: #e4e7f6;
+            margin-top: 3px;
+          "
         >
-          {{ wroting ? "Đang trả lời" : new Date(lastOnline).toLocaleTimeString() }}
+          <template v-if="peopleComposing.length > 0">
+            {{
+              isPrivate
+                ? "Đang trả lời"
+                : peopleComposing.map(item => item.name).join(", ") +
+                  " đang trả lời"
+            }}
+          </template>
+          <template v-else>
+            <template v-if="isOnline">
+              Online
+            </template>
+            <template v-else>
+              <vue-timeagojs
+                v-if="isPrivate"
+                :time="lastOnline"
+                locale="vi-VN"
+                :delay="60000"
+              />
+              <template v-else>
+                You and {{ members.length }} members other.
+              </template>
+            </template>
+          </template>
         </div>
       </nuxt-link>
       <v-spacer></v-spacer>
       <v-btn icon>
-        <v-icon>
-          mdi-video
-        </v-icon>
+        <v-icon> mdi-video </v-icon>
       </v-btn>
       <v-btn icon>
-        <v-icon>
-          mdi-phone
-        </v-icon>
+        <v-icon> mdi-phone </v-icon>
       </v-btn>
 
       <client-only>
@@ -75,9 +94,7 @@
                 <v-list-item v-on="on" v-bind="attrs">
                   <v-list-item-title> Thêm </v-list-item-title>
                   <v-list-item-action>
-                    <v-icon>
-                      mdi-menu-right
-                    </v-icon>
+                    <v-icon> mdi-menu-right </v-icon>
                   </v-list-item-action>
                 </v-list-item>
               </template>
@@ -128,13 +145,13 @@
         12:10 CH
       </div>
       <template
-        v-for="({ content, mysend, created, sended, readed },
+        v-for="({ body, created, endorsed, isend, sent = true },
         index) in messages"
       >
         <div
           class="message"
           :class="{
-            'my-message': mysend
+            'my-message': isend
           }"
           :key="index"
           ref="message"
@@ -142,58 +159,58 @@
           <div class="message--inner">
             <section
               class="inner file"
-              v-if="content.file"
+              v-if="body.file && isEmpty(body.file) === false"
               :class="{
-                'other mb-0': isFileOther(content.file.type)
+                'other mb-0': isFileOther(body.file.type)
               }"
             >
               <v-img
-                v-if="content.file.type.match(/image\//)"
-                :src="content.file.src"
-                :width="content.file.ratio < 1 ? 226 : 251"
+                v-if="typeofFile(body.file) === `image`"
+                :src="body.file.src"
+                :width="body.file.ratio < 1 ? 226 : 251"
                 :aspect-ratio="
-                  content.file.ratio < 1
-                    ? 226 / 316
-                    : Math.min(1, content.file.ratio)
+                  body.file.ratio < 1 ? 226 / 316 : Math.min(1, body.file.ratio)
                 "
-                background-color="black"
+                @load="revokeBlob(body.file.src)"
+                style="background-color: #000"
                 class="d-block"
               />
               <v-responsive
                 :aspect-ratio="
-                  content.file.ratio < 1 ? 226 / 316 : content.file.ratio
+                  body.file.ratio < 1 ? 226 / 316 : body.file.ratio
                 "
-                v-else-if="content.file.type.match(/video\//)"
+                v-else-if="typeofFile(body.file) === `video`"
                 width="100%"
               >
-                <video
-                  :src="content.file.src"
+                <app-video
+                  :src="body.file.src"
                   style="width: 100%; display: block"
                   controls
-                ></video>
+                  @loadedmetadata="revokeBlob(body.file.src)"
+                ></app-video>
+                <span class="time time-video">
+                  <span class="time--box">
+                    {{ moment(body.file.duration * 1000).format("mm:ss") }}
+                  </span>
+                </span>
               </v-responsive>
-              <audio
-                v-else-if="content.file.type.match(/audio\//)"
-                :src="content.file.src"
+              <app-audio
+                v-else-if="typeofFile(body.file) === `audio`"
+                :src="body.file.src"
                 style="width: 100%; display: block"
                 controls
-              ></audio>
+                @loadedmetadata="revokeBlob(body.file.src)"
+              ></app-audio>
               <div class="preview-file-other" v-else>
                 <div class="d-flex align-center">
                   <div class="file--icon">
                     <span
                       class="fiv-viv"
-                      :class="[
-                        `fiv-icon-${
-                          existsIcon(extname(content.file.name))
-                            ? extname(content.file.name)
-                            : 'blank'
-                        }`
-                      ]"
+                      :class="`fiv-icon-${getIconExt(body.file.name)}`"
                     ></span>
                   </div>
                   <div class="file--name font-weight-regular ml-3">
-                    {{ content.file.name }}
+                    {{ body.file.name }}
                   </div>
                 </div>
 
@@ -202,19 +219,22 @@
                     class="time ml-0 text-uppercase"
                     style="text-align: left; float: none"
                   >
-                    {{ extname(content.file.name) }}
+                    <template v-if="body.file.size">
+                      {{ filesize(body.file.size || 0) }} •
+                    </template>
+                    {{ extname(body.file.name) }}
                   </span>
                   <span class="time" style="float: none">
                     {{ moment(created).format("hh:mm") }}
                     <v-icon
                       size="16"
                       class="ml-1"
-                      v-if="mysend"
-                      :color="readed ? `blue` : undefined"
+                      v-if="isend"
+                      :color="endorsed.length > 0 ? `blue` : undefined"
                     >
                       {{
-                        sended
-                          ? readed
+                        sent
+                          ? endorsed.length > 0
                             ? "mdi-check-all"
                             : "mdi-check"
                           : "mdi-clock-outline"
@@ -224,26 +244,29 @@
                 </div>
               </div>
             </section>
-            <section class="inner" v-else>{{ content.body }}</section>
+            <section class="inner" v-else>{{ body.content }}</section>
+
             <span
               class="time"
-              v-if="!content.file || !isFileOther(content.file.type)"
+              v-if="!body.file || !isFileOther(body.file.type)"
             >
-              {{ moment(created).format("hh:mm") }}
-              <v-icon
-                size="16"
-                class="ml-1"
-                v-if="mysend"
-                :color="readed ? `blue` : undefined"
-              >
-                {{
-                  sended
-                    ? readed
-                      ? "mdi-check-all"
-                      : "mdi-check"
-                    : "mdi-clock-outline"
-                }}
-              </v-icon>
+              <span class="time--box">
+                {{ moment(created).format("hh:mm") }}
+                <v-icon
+                  size="16"
+                  class="ml-1"
+                  v-if="isend"
+                  :color="endorsed.length > 0 ? `blue` : undefined"
+                >
+                  {{
+                    sent
+                      ? endorsed.length > 0
+                        ? "mdi-check-all"
+                        : "mdi-check"
+                      : "mdi-clock-outline"
+                  }}
+                </v-icon>
+              </span>
             </span>
             <div class="clearfix"></div>
           </div>
@@ -284,7 +307,7 @@
               class="icon"
               v-show="!messageReal"
               key="2"
-              @click="selectImage"
+              @click="sendFiles(`image/*`, false)"
             >
               <v-icon> mdi-camera </v-icon>
             </v-btn>
@@ -343,73 +366,42 @@
 
 <script>
 import { VEmojiPicker } from "v-emoji-picker";
-import FileToArrayBuffer from "file-to-array-buffer";
 import moment from "moment";
 import { socket } from "~/plugins/vue-socket.io-extended";
 import socketIOFileClient from "socket.io-file-client";
-import { extname } from "path";
 import VueInfiniteLoading from "vue-infinite-loading";
+import isOnline from "~/helpers/isOnline";
+import lastOnline from "~/helpers/lastOnline";
+import setIOnline from "~/helpers/setIOnline";
+import setIOffline from "~/helpers/setIOffline";
+import {
+  sizeofImage,
+  sizeofVideo,
+  durationAudio
+} from "~/helpers/sizeofSocial";
+import { isInViewport } from "~/helpers/offsetElement";
+import selectFile from "~/helpers/selectFile";
+import isEmpty from "lodash.isempty";
+import getIconExt, { _extname as extname } from "~/helpers/iconExtFile";
+import typeofFile, {
+  isFileOther,
+  REGEXP_IMAGE,
+  REGEXP_VIDEO,
+  REGEXP_AUDIO
+} from "~/helpers/typeofFile";
+import filesize from "filesize";
 import "file-icon-vectors/dist/file-icon-vivid.min.css";
+import AppVideo from "~/components/AppVideo";
+import AppAudio from "~/components/AppAudio";
 
 const uploader = new socketIOFileClient(socket);
 
-function isInViewport(element) {
-  const rect = element.getBoundingClientRect();
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <=
-      (window.innerHeight || document.documentElement.clientHeight) &&
-    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
-}
-function sizeofImage(src) {
-  const img = new Image();
-  const promise = new Promise((resolve, reject) => {
-    img.addEventListener(
-      "load",
-      () => {
-        resolve({ width: img.width, height: img.height });
-      },
-      { once: true }
-    );
-    img.addEventListener(
-      "error",
-      () => {
-        reject("GET_SIZEOF_IMAGE_ERROR");
-      },
-      { once: true }
-    );
-
-    setTimeout(() => resolve({}), 60000);
-  });
-  img.src = src;
-
-  return promise;
-}
-function sizeofVideo(src) {
-  const img = document.createElement("video");
-  const promise = new Promise((resolve, reject) => {
-    img.addEventListener(
-      "loadedmetadata",
-      () => {
-        resolve({ width: img.videoWidth, height: img.videoHeight });
-      },
-      { once: true }
-    );
-    img.addEventListener(
-      "error",
-      () => {
-        reject("GET_SIZEOF_VIDEO_ERROR");
-      },
-      { once: true }
-    );
-
-    setTimeout(() => resolve({}), 60000);
-  });
-  img.src = src;
-
-  return promise;
+function setParagrapToBr() {
+  try {
+    document.execCommand("defaultParagraphSeparator", false, "br");
+  } catch (e) {
+    console.warn(`Browser not support default-paragraph-separator`);
+  }
 }
 let onScroll;
 
@@ -418,85 +410,156 @@ let idMessageSend = -1;
 export default {
   components: {
     VEmojiPicker,
-    VueInfiniteLoading
+    VueInfiniteLoading,
+    AppVideo,
+    AppAudio
   },
   meta: {
     navbar: false
   },
   async asyncData({ $axios, params: { id } }) {
     const {
-      data: { _id, name, avatar, lastOnline, messages = [] }
+      data: {
+        _id,
+        roomId,
+        members,
+        private: isPrivate,
+        name,
+        avatar,
+        messages = []
+      }
     } = await $axios.get(`/chat/${id}`);
 
     return {
-      id,
+      id: _id,
+      roomId,
+      members,
+      isPrivate,
       name,
       avatar,
-      lastOnline,
-      messages,
-      wroting: false
+      messages
     };
   },
   data() {
     return {
       message: "",
-      emojiPickerOn: false
+      emojiPickerOn: false,
+      focusing: []
     };
   },
   computed: {
-    moment() {
-      return moment;
-    },
     messageReal() {
       const message = decodeURIComponent(
-        this.message.replace(/<\/? ?br>/gi, "\n").replace(/^\s+|\s+$/g, "")
+        this.message.replace(/<\/? ?br>/gi, "\n")
       )
-        .replace(/&quot;/g, '"')
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&amp;/g, "&");
+        .replace(/\&[^\s;]{1,};/g, template => {
+          const div = document.createElement("div");
+          div.innerHTML = template;
+
+          return div.innerText;
+        })
+        .replace(/^\s+|\s+$/g, "");
       return message;
+    },
+    isOnline() {
+      return isOnline(this.members);
+    },
+    lastOnline() {
+      return lastOnline(this.members);
+    },
+    peopleComposing() {
+      return this.members.filter(item =>
+        this.focusing.some(id => id === item._id)
+      );
+    }
+  },
+  watch: {
+    messages() {
+      setTimeout(() => {
+        if (onScroll) {
+          onScroll();
+        }
+      }, 70);
     }
   },
   sockets: {
-    "send message__SUCCESS"({ uid, idMessage }) {
-      const message = this.messages.find(item => item.uid === uid);
+    "send message__SUCCESS"(chatId, uid, messageID) {
+      if (this.id === chatId) {
+        const message = this.messages.find(
+          item => "uid" in item && item.uid === uid
+        );
 
-      if (message) {
-        message.sended = true;
-        this.$delete(message, "uid");
-        this.$set(message, "_id", idMessage);
+        if (message) {
+          this.$delete(message, "uid");
+          message.sent = true;
+          this.$set(message, "_id", messageID);
+        }
       } else {
-        console.error(`${uid} not found`);
+        console.log(`Invalid packet ${uid}`);
       }
     },
-    "send message__ERROR"(message) {
-      console.log("error", message);
-    },
-    "new message"({ body } = {}) {
-      if (body) {
-        this.messages.push(Object.assign({}, body));
+    "new message"(roomId, message) {
+      if (this.roomId === roomId) {
+        this.messages.push(message);
+      }
+      setTimeout(() => {
         this.toEndPage();
+      }, 70);
+    },
+    "read message"(roomId, idSender, beforeId) {
+      if (this.roomId === roomId) {
+        for (
+          let index = 0, length = this.messages.length;
+          index < length;
+          index++
+        ) {
+          const message = this.messages[index];
+
+          if (
+            (message.isend === true
+              ? idSender !== this.$auth.user._id
+              : true) &&
+            message.endorsed.indexOf(idSender) === -1
+          ) {
+            message.endorsed.push(idSender);
+          }
+
+          if (message._id === beforeId) {
+            break;
+          }
+        }
       }
     },
-    "user online"({ _id, lastOnline }) {
-      if (this.id === _id) {
-        this.lastOnline = lastOnline;
+    "created chat"(id, roomId) {
+      this.roomId = roomId;
+    },
+    "i online"(id) {
+      setIOnline(this.members, id);
+    },
+    "i offline"(id, lastTime) {
+      setIOffline(this.members, id, lastTime);
+    },
+    "i focus"(roomId, userId) {
+      if (this.roomId === roomId) {
+        if (this.focusing.every(item => item !== userId)) {
+          this.focusing.push(userId);
+        }
       }
     },
-    "readed message"(toId) {
-      this.readedMessageAfter(toId);
-    },
-    "enemy writing"(id) {
-      console.log(`writing ${id}`);
-      this.wroting = true;
-    },
-    "enemy writed"(id) {
-      console.log(`writed ${id}`);
-      this.wroting = false;
+    "i blur"(roomId, userId) {
+      if (this.roomId === roomId) {
+        this.focusing = this.focusing.filter(item => item !== userId);
+      }
     }
   },
   methods: {
+    moment,
+    isEmpty,
+    getIconExt,
+    extname,
+    typeofFile,
+    isFileOther,
+    filesize,
     onFocusEdit() {
       this.$socket.client.emit("focused", this.id);
       console.log("focused");
@@ -505,13 +568,18 @@ export default {
       this.$socket.client.emit("blured", this.id);
       console.log("blured");
     },
+    onEnter(event) {
+      event.preventDefault();
+      this.sendMessage();
+    },
+    onEnterShift(event) {},
     async loadMoreOldMessage({ loaded, complete }) {
       // complete();
       const {
         data: { messages = [] }
       } = await this.$axios.get(`/chat/${this.id}`, {
         params: {
-          beforeId: this.messages[0]._id
+          "before-id": this.messages[0]?._id
         }
       });
 
@@ -522,30 +590,20 @@ export default {
         loaded();
       }
     },
-    extname(path) {
-      return extname(path).replace(/^\./, "");
-    },
-    existsIcon(icon) {
-      try {
-        require(`file-icon-vectors/dist/icons/vivid/${icon}.svg`);
-
-        return true;
-      } catch (e) {
-        return false;
-      }
-    },
-    isFileOther(type) {
-      return !(type || ``).match(/(?:image|video|audio)\//);
-    },
-    onEnter(event) {
-      event.preventDefault();
-      this.sendMessage();
-    },
-    onEnterShift(event) {},
     toEndPage() {
       this.$vuetify.goTo(document.body.scrollHeight, {
         duration: 333,
         easing: "linear"
+      });
+    },
+    addiMessageToLocal(uid, body) {
+      this.messages.push({
+        uid,
+        endorsed: [],
+        body,
+        created: new Date().toISOString(),
+        isend: true,
+        sent: false
       });
     },
     sendMessage() {
@@ -554,22 +612,11 @@ export default {
       if (message) {
         const uid = ++idMessageSend;
 
-        this.messages.push({
-          content: {
-            body: message
-          },
-          created: new Date().toISOString(),
-          mysend: true,
-          readed: false,
-          sended: false,
-          uid
+        this.addiMessageToLocal(uid, {
+          content: message
         });
 
-        this.$socket.client.emit("send message", {
-          _id: this.id,
-          content: message,
-          uid
-        });
+        this.$socket.client.emit("send message", this.id, message, uid);
 
         this.$refs.textarea__inner.innerHTML = "";
         this.message = "";
@@ -579,181 +626,119 @@ export default {
 
       return false;
     },
-    readedMessageAfter(id) {
-      this.messages.some(message => {
-        if (message._id === id) {
-          return true;
-        }
-
-        if (message.mysend === true && message.readed === false) {
-          message.readed = true;
-        }
-      });
-    },
-    selectFile(accept) {
-      const input = document.createElement("input");
-      input.setAttribute("hidden", true);
-      input.setAttribute("type", "file");
-      input.setAttribute("accept", accept);
-
-      const promis = new Promise((resolve, reject) => {
-        input.addEventListener(
-          "change",
-          () => {
-            resolve(input.files);
-            input.remove();
-          },
-          { once: true }
-        );
-        input.addEventListener("blur", () => {
-          if (input.files.length === 0) {
-            reject();
-          }
-        });
-      });
-
-      document.body.appendChild(input);
-      input.click();
-
-      return promis;
-    },
-    toBase64(file) {
-      const reader = new FileReader();
-      const pro = new Promise((resolve, reject) => {
-        reader.addEventListener(
-          "load",
-          () => {
-            resolve(reader.result);
-          },
-          { once: true }
-        );
-        reader.addEventListener(
-          "error",
-          () => {
-            reject();
-          },
-          { once: true }
-        );
-      });
-
-      reader.readAsDataURL(file);
-
-      return pro;
-    },
     toBlobFile(file) {
-      return URL.createObjectURL(file);
+      const blob = URL.createObjectURL(file);
+
+      return blob;
     },
     revokeBlob(blob) {
-      URL.revokeObjectURL(blob);
-    },
-    async selectImage() {
-      const files = await this.selectFile();
-      const blobFile = this.toBlobFile(files[0]);
-      const uid = ++idMessageSend;
-
-      const { name, type } = files[0];
-      let ratio;
-      if (type.match(/image\//)) {
-        /// image
-        const { width, height } = await sizeofImage(blobFile);
-        ratio = width / height;
-      } else if (type.match(/video\//)) {
-        /// video
-        const { width, height } = await sizeofVideo(blobFile);
-        ratio = width / height;
-      }
-
-      this.messages.push({
-        content: {
-          file: {
-            src: blobFile,
-            name,
-            type,
-            ...(ratio ? { ratio } : {})
-          }
-        },
-        created: new Date().toISOString(),
-        mysend: true,
-        readed: false,
-        sended: false,
-        uid
-      });
-
       setTimeout(() => {
-        this.toEndPage();
-      }, 70);
-
-      uploader.upload(
-        { files },
-        {
-          data: {
-            _id: this.id,
-            uid
-          }
+        if (blob.match(/^blob\:/)) {
+          URL.revokeObjectURL(blob);
         }
-      );
+      }, 70);
+    },
+    async sendFiles(accept) {
+      const files = await selectFile(accept);
+      files.forEach(async file => {
+        try {
+          const blobFile = this.toBlobFile(file);
+          const uid = ++idMessageSend;
 
-      return;
-      this.$socket.client.emit("send message", {
-        _id: this.id,
-        file: {
-          buffer: await FileToArrayBuffer(files[0]),
-          name,
-          type
-        },
-        uid
+          const { name, type } = file;
+          let ratio, duration;
+          if (type?.match(REGEXP_IMAGE)) {
+            /// image
+            const { width, height } = await sizeofImage(blobFile);
+            ratio = width / height;
+          } else if (type?.match(REGEXP_VIDEO)) {
+            /// video
+            const { width, height, duration: _d } = await sizeofVideo(blobFile);
+            ratio = width / height;
+            duration = _d;
+          }
+
+          if (type?.match(REGEXP_AUDIO)) {
+            const { duration: _d } = await durationAudio(blobFile);
+            duration = _d;
+          }
+
+          this.addiMessageToLocal(uid, {
+            file: {
+              src: blobFile,
+              name,
+              type,
+              size: file.size,
+              ...(ratio ? { ratio } : {}),
+              ...(duration ? { duration } : {})
+            }
+          });
+          setTimeout(() => {
+            this.toEndPage();
+          }, 70);
+
+          uploader.upload(
+            { files: [file] },
+            {
+              data: {
+                _id: this.id,
+                uid
+              }
+            }
+          );
+        } catch (err) {
+          console.log(err);
+          console.error("FORMAT_FILE_ERROR");
+        }
       });
     }
   },
-  created() {
-    if (process.isClient) {
-      this.$socket.client.emit("join to room 2 private", this.id);
-      this.toEndPage();
+  beforeMount() {
+    const _id = this.messages[this.messages.length - 1]?._id;
+
+    if (_id) {
+      this.$socket.client.emit("i read message", this.id, _id);
     }
-  },
-  beforeDestroy() {
-    if (process.isClient) {
-      this.$socket.client.emit("left join to room 2 private", this.id);
-      window.removeEventListener("scroll", onScroll);
-    }
-  },
-  updated() {
-    if (onScroll) {
-      onScroll();
-    }
-  },
-  mounted() {
-    try {
-      document.execCommand("defaultParagraphSeparator", false, "br");
-    } catch (e) {
-      console.warn(`Browser not support default-paragraph-separator`);
-    }
-    this.toEndPage();
+
     window.addEventListener(
       "scroll",
       (onScroll = () => {
         const refMessages = Array.isArray(this.$refs.message)
           ? this.$refs.message
-          : [this.$refs.message];
+          : this.$refs.message
+          ? [this.$refs.message]
+          : [];
 
-        refMessages.forEach((message, index) => {
+        refMessages.reverse().some((message, index) => {
           if (isInViewport(message)) {
-            const { _id, mysend, readed } = this.messages[index];
+            const { _id: idMessage, isend, endorsed } = this.messages[index];
 
-            if (mysend !== true && readed === false) {
-              this.$socket.client.emit("readed message", {
-                _id: this.id,
-                beforeId: _id
+            if (
+              isend !== true &&
+              endorsed.indexOf(this.$auth.user._id) === -1
+            ) {
+              this.$socket.client.emit("i read message", this.id, idMessage);
+              this.messages.some(message => {
+                message.endorsed.push(this.$auth.user._id);
+                if (message._id === idMessage) {
+                  return true;
+                }
               });
-
-              this.readedMessageAfter(_id);
+              /// if finded message not read then break forEach
+              return true;
             }
           }
         });
       })
     );
-    onScroll();
-
+  },
+  beforeDestroy() {
+    window.removeEventListener("scroll", onScroll);
+    onScroll = null;
+  },
+  mounted() {
+    setParagrapToBr();
+    this.toEndPage();
     uploader.on("start", function(fileInfo) {
       console.log("Start uploading", fileInfo);
     });
@@ -827,6 +812,7 @@ export default {
 <style lang="scss" scoped>
 $width-triangle: 10px;
 
+.clearfix,
 .clearfix::after {
   content: "";
   clear: both;
@@ -910,6 +896,8 @@ $width-triangle: 10px;
       border-radius: 7px;
       display: inline-block;
       text-align: left;
+      position: relative;
+      // overflow: hidden;
 
       .inner {
         word-break: break-word;
@@ -917,22 +905,40 @@ $width-triangle: 10px;
         text-align: left;
         white-space: pre-wrap;
         display: inline;
+        position: relative;
+        box-sizing: border-box;
         &.file:not(.other) {
           margin: -0 -5px;
           display: block;
           overflow: hidden;
           white-space: nowrap;
 
-          + .time {
+          + .time,
+          .time-video {
             position: absolute;
-            bottom: 5px;
-            right: (5px + 5px);
-            color: #fff;
-            background-image: radial-gradient(
-              rgba(0, 0, 0, 0.33),
-              rgba(0, 0, 0, 0.27)
-            );
-            box-shadow: 0 0 20px 10px rgb(0 0 0 / 33%);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 5px;
+            overflow: hidden;
+            .time--box {
+              position: absolute;
+              // bottom: 5px;
+              // right: (5px + 5px);
+              bottom: 0px;
+              right: 5px;
+              color: #fff;
+              background-image: radial-gradient(
+                rgba(0, 0, 0, 0.33),
+                rgba(0, 0, 0, 0.27)
+              );
+              box-shadow: 0 0 20px 30px /* 10px */ rgb(0 0 0 / 22%);
+              border-radius: 25%;
+              &::v-deep .v-icon {
+                color: inherit;
+              }
+            }
           }
         }
         &.file.other {
@@ -953,6 +959,12 @@ $width-triangle: 10px;
         margin-left: 18px;
         float: right;
         line-height: 2;
+        &.time-video .time--box {
+          left: 5px;
+          right: auto !important;
+          bottom: -5px !important;
+          font-size: 11px !important;
+        }
       }
     }
 

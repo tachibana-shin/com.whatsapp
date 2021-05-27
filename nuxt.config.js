@@ -31,7 +31,8 @@ export default {
     "~/plugins/vue-teleport",
     "~/plugins/vuetify-toast2",
     "~/plugins/nuxt-axios",
-    { src: "~/plugins/vue-socket.io-extended", ssr: false }
+    { src: "~/plugins/vue-socket.io-extended", ssr: false },
+    "~/plugins/vue-timeago.js.js"
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

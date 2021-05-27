@@ -1,6 +1,6 @@
 <template>
   <v-card flat color="transparent">
-    <app-list class="pa-0 mx-n2" />
+    <!-- <app-list class="pa-0 mx-n2" /> -->
 
     <v-teleport to="fab">
       <div>
@@ -28,12 +28,3 @@
     </v-teleport>
   </v-card>
 </template>
-
-<script>
-import AppList from "~/components/AppList";
-export default {
-  components: {
-    AppList
-  }
-};
-</script>

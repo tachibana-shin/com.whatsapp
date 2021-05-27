@@ -1,0 +1,35 @@
+
+.count-message-noread {
+   width: 20px;
+   height: 20px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   border-radius: 50%;
+   flex: 0 0 20px;
+   margin-left: 3px;
+ }
+ .status-activity {
+   font-size: 17px;
+   font-weight: 400;
+ }
+ .content-activity {
+   font-size: 15px;
+   color: #757575 !important;
+   margin-top: 4px;
+ }
+ .addon {
+   width: 16px;
+   height: 16px;
+   border-radius: 50%;
+   background-color: rgb(0, 204, 63);
+   border-color: rgb(0, 204, 63);
+   position: absolute;
+   bottom: -5px;
+   right: 0;
+ }
+ 
+ .status-time {
+   font-size: 14px;
+   color: #757575 !important;
+ }

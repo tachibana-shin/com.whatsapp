@@ -914,6 +914,14 @@
   dependencies:
     vue "^2.5.22"
 
+"@dongido/vue-viaudio@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@dongido/vue-viaudio/-/vue-viaudio-0.3.5.tgz#041b3d0d82028c55381e27df33cbe0b5ec95eb4f"
+  integrity sha512-VAjt2UTTQfdl48N5vEuADUvo+ydRbbp9RvTHpgo8XhTCKeNmZxX6f1V/7pn8La4TiPAGLtKhv2iQ/MXbjF6lag==
+  dependencies:
+    core-js "^2.6.5"
+    vue "^2.6.10"
+
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.4.tgz#d4b3549a5db5de2683e0c1071ab4f140904bbf69"
@@ -3562,15 +3570,15 @@ file-loader@^6.2.0:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
 
-file-to-array-buffer@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/file-to-array-buffer/-/file-to-array-buffer-1.0.0.tgz#baf56edb2ce94f4bfac5158334f0835661d072f8"
-  integrity sha512-rcJKsia0uWadVOwR9Ov6r0HLClWs/ZESzayu/wQ+DjRuxw6tD5rv8u7p6LGG3bXMbC+IdWXye/xsY3GnOzj0fA==
-
 file-uri-to-path@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz#553a7b8446ff6f684359c445f1e37a05dacc33dd"
   integrity sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==
+
+filesize@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/filesize/-/filesize-6.3.0.tgz#dff53cfb3f104c9e422f346d53be8dbcc971bf11"
+  integrity sha512-ytx0ruGpDHKWVoiui6+BY/QMNngtDQ/pJaFwfBpQif0J63+E8DLdFyqS3NkKQn7vIruUEpoGD9JUJSg7Kp+I0g==
 
 fill-range@^4.0.0:
   version "4.0.0"
@@ -4736,6 +4744,11 @@ lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
   integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
+
+lodash.isempty@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/lodash.isempty/-/lodash.isempty-4.4.0.tgz#6f86cbedd8be4ec987be9aaf33c9684db1b31e7e"
+  integrity sha1-b4bL7di+TsmHvpqvM8loTbGzHn4=
 
 lodash.kebabcase@^4.1.1:
   version "4.1.1"
@@ -7514,6 +7527,11 @@ time-fix-plugin@^2.0.7:
   resolved "https://registry.yarnpkg.com/time-fix-plugin/-/time-fix-plugin-2.0.7.tgz#4ba70ae2e40cedf34dabe505eda7b71b1b244f50"
   integrity sha512-uVFet1LQToeUX0rTcSiYVYVoGuBpc8gP/2jnlUzuHMHe+gux6XLsNzxLUweabMwiUj5ejhoIMsUI55nVSEa/Vw==
 
+timeago.js@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/timeago.js/-/timeago.js-4.0.2.tgz#724e8c8833e3490676c7bb0a75f5daf20e558028"
+  integrity sha512-a7wPxPdVlQL7lqvitHGGRsofhdwtkoSXPGATFuSOA2i1ZNQEPLrGnj68vOp2sOJTCFAQVXPeNMX/GctBaO9L2w==
+
 timers-browserify@^2.0.4:
   version "2.0.12"
   resolved "https://registry.yarnpkg.com/timers-browserify/-/timers-browserify-2.0.12.tgz#44a45c11fbf407f34f97bccd1577c652361b00ee"
@@ -7961,6 +7979,13 @@ vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue-timeago.js@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/vue-timeago.js/-/vue-timeago.js-0.0.1.tgz#e44b819a6387346e9bc847d5bcea00f88031b000"
+  integrity sha512-kIv0kQI05/z+E8G2Df9vvnsoFn7gq0HPAPGLBpQ+qc/YRc1QY+OsT0uOMJfv/PJropsmPMBcSLBnsdnjMvyrkg==
+  dependencies:
+    timeago.js "^4.0.2"
 
 vue-web-cam@^1.9.0:
   version "1.9.0"

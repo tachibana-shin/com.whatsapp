@@ -81,13 +81,21 @@
 
 <script>
 import socketLogin from "~/helpers/socket-login";
-import socketOnline from "~/helpers/socket-online";
 
 export default {
   fetchOnServer: false,
   async fetch() {
     socketLogin(this.$socket.client, this.$auth.strategy.token.get());
-    socketOnline(this.$socket.client);
+  },
+  watch: {
+    "$auth.loggedIn": {
+      handler(value) {
+        if (process.isClient) {
+          socketLogin(this.$socket.client, this.$auth.strategy.token.get());
+        }
+      },
+      immediate: true
+    }
   }
 };
 </script>
