@@ -1,24 +1,29 @@
 <template>
-  <vue-media
-    kind="audio"
-    controls
-    :src="src"
-    @loadedmetadata="$emit(`loadedmetadata`)"
-  />
+  <div class="audio">
+    <audio
+      :src="src"
+      @loadedmetadata="$emit(`loadedmetadata`)"
+      controls
+      ref="audio"
+    />
+  </div>
 </template>
 
 <script>
-import VueMedia from "@dongido/vue-viaudio";
-
 export default {
   props: {
     src: {
       type: String,
       required: true
     }
-  },
-  components: {
-    VueMedia
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.audio {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+</style>

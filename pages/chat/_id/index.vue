@@ -122,7 +122,7 @@
       </client-only>
     </v-app-bar>
 
-    <div class="chat--frame my-n3">
+    <div class="chat--frame ma-n3 px-3">
       <client-only>
         <vue-infinite-loading
           direction="top"
@@ -145,7 +145,7 @@
         12:10 CH
       </div>
       <template
-        v-for="({ body, created, endorsed, isend, sent = true },
+        v-for="({ body, created, endorsed, sender, isend, sent = true },
         index) in messages"
       >
         <div
@@ -157,6 +157,9 @@
           ref="message"
         >
           <div class="message--inner">
+            <div class="sender" v-if="isend === false">
+              {{ getNameSender(sender) }}
+            </div>
             <section
               class="inner file"
               v-if="body.file && isEmpty(body.file) === false"
@@ -190,6 +193,7 @@
                 ></app-video>
                 <span class="time time-video">
                   <span class="time--box">
+                    <v-icon size="1.5em"> mdi-video </v-icon>
                     {{ moment(body.file.duration * 1000).format("mm:ss") }}
                   </span>
                 </span>
@@ -295,12 +299,68 @@
             class="d-flex order-2 mt-auto mb-0"
             tag="div"
           >
-            <v-menu :nudge-width="500" bottom key="1">
+            <v-menu
+              :nudge-width="500"
+              width="340px"
+              absolute
+              offset-overflow
+              key="1"
+              content-class="toolbox"
+            >
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon class="icon" v-on="on" v-bind="attrs">
                   <v-icon> mdi-link-variant mdi-rotate-270 </v-icon>
                 </v-btn>
               </template>
+
+              <v-card flat color="white">
+                <v-card-text>
+                  <v-row class="text-center">
+                    <v-col cols="4" v-ripple @click="sendFiles()">
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_document.png`)" />
+                      </v-avatar>
+                      <div class="name">Tài liệu</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple @click="sendFiles(`image/*`)">
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_camera.png`)" />
+                      </v-avatar>
+                      <div class="name">Camera</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple>
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_gallery.png`)" />
+                      </v-avatar>
+                      <div class="name">Bộ sưu tập</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple @click="sendFiles(`audio/*`)">
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_audio.png`)" />
+                      </v-avatar>
+                      <div class="name">Âm thanh</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple>
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_video.png`)" />
+                      </v-avatar>
+                      <div class="name">Phòng họp mặt</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple>
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_location.png`)" />
+                      </v-avatar>
+                      <div class="name">Vị trí</div>
+                    </v-col>
+                    <v-col cols="4" v-ripple>
+                      <v-avatar size="54px">
+                        <v-img :src="require(`~/assets/attach_contact.png`)" />
+                      </v-avatar>
+                      <div class="name">Liên hệ</div>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
             </v-menu>
             <v-btn
               icon
@@ -603,7 +663,8 @@ export default {
         body,
         created: new Date().toISOString(),
         isend: true,
-        sent: false
+        sent: false,
+        sender: this.$auth.user._id
       });
     },
     sendMessage() {
@@ -691,6 +752,9 @@ export default {
           console.error("FORMAT_FILE_ERROR");
         }
       });
+    },
+    getNameSender(id) {
+      return this.members.find(item => item._id === id)?.name;
     }
   },
   beforeMount() {
@@ -897,7 +961,15 @@ $width-triangle: 10px;
       display: inline-block;
       text-align: left;
       position: relative;
+      // width: 100%;
       // overflow: hidden;
+
+      .sender {
+        color: #b4c64c;
+        + .file:not(.other) {
+          margin-top: 5px !important;
+        }
+      }
 
       .inner {
         word-break: break-word;
@@ -972,6 +1044,9 @@ $width-triangle: 10px;
       margin-top: 4px;
     }
     + .my-message {
+      .sender {
+        display: none;
+      }
       margin-top: 12px;
       + .message {
         margin-top: 12px;
@@ -1137,6 +1212,27 @@ $width-triangle: 10px;
     // width: 0;
     transform: translateX(10%);
     opacity: 0;
+  }
+}
+</style>
+
+<style lang="scss">
+.toolbox {
+  top: auto !important;
+  bottom: (52px + 5) !important;
+  border-radius: 17.5px;
+  box-shadow: none;
+  .col {
+    padding: {
+      top: 10.5px;
+      bottom: 10.5;
+    }
+    cursor: pointer;
+  }
+  .name {
+    color: #8c8c8c !important;
+    font-weight: 400;
+    font-family: sans-serif;
   }
 }
 </style>

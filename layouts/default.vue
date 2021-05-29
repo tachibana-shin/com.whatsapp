@@ -107,3 +107,27 @@ export default {
   right: 0;
 }
 </style>
+
+<style lang="scss">
+body,
+html {
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #000000;
+    // border: 2px solid #555555;
+    background-color: #555555;
+    border-radius: 5px;
+  }
+}
+</style>
