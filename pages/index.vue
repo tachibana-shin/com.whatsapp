@@ -1,8 +1,8 @@
 <template>
   <v-card flat color="transparent" class="fill-height" width="100%">
-    <app-invite-friends v-if="false" />
+    <app-invite-friends v-if="list.length === 0" />
 
-    <v-list class="pa-0 mx-n2" color="transparent" multiple>
+    <v-list class="pa-0 mx-n2" color="transparent" multiple v-else>
       <v-list-item
         v-for="(item, index) in list"
         :key="index"
@@ -124,7 +124,7 @@ export default {
           this.list.unshift(
             (await this.$axios.get(`/chat/${roomId}/info`)).data
           );
-        } catch (e) {
+        } catch {
           console.log(
             `Warn: Can't find chat a parent message ${message._id} from chat id ${roomId}`
           );

@@ -1,5 +1,9 @@
 <template>
+  <v-avatar :size="size" v-if="noBadge">
+    <v-img style="background-color: #000" :src="src"> </v-img>
+  </v-avatar>
   <v-badge
+    v-else
     bottom
     dot
     overlap
@@ -9,7 +13,7 @@
     transition="scale-transition"
     :value="online"
   >
-    <v-avatar :size="size">
+    <v-avatar :size="size" :to="!!to ? to : undefined">
       <v-img style="background-color: #000" :src="src"> </v-img>
     </v-avatar>
   </v-badge>
@@ -22,7 +26,9 @@ export default {
     offsetY: Number,
     src: String,
     online: Boolean,
-    size: [String, Number]
+    size: [String, Number],
+    noBadge: Boolean,
+    to: String
   }
 };
 </script>

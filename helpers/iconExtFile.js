@@ -5,7 +5,7 @@ export function exists(name) {
     require(`file-icon-vectors/dist/icons/vivid/${name}.svg`);
 
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

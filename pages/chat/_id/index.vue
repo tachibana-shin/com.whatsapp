@@ -6,7 +6,12 @@
       <v-btn icon @click="$router.back()">
         <v-icon> mdi-arrow-left </v-icon>
       </v-btn>
-      <app-avatar :src="avatar" :online="isOnline" :size="37" />
+      <app-avatar
+        :src="avatar"
+        :online="isOnline"
+        :size="37"
+        :to="`/user/${id}`"
+      />
       <nuxt-link
         tag="div"
         :to="`/user/${id}`"
@@ -72,11 +77,11 @@
           </template>
 
           <v-list>
-            <v-list-item>
+            <v-list-item :to="`/user/${id}`">
               <v-list-item-title>Xem người liên hệ</v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title
+              <v-list-item-title :to="`/user/${id}/media`"
                 >Tệp phương tiện, liên kết và tài liệu</v-list-item-title
               >
             </v-list-item>
@@ -459,7 +464,7 @@ const uploader = new socketIOFileClient(socket);
 function setParagrapToBr() {
   try {
     document.execCommand("defaultParagraphSeparator", false, "br");
-  } catch (e) {
+  } catch {
     console.warn(`Browser not support default-paragraph-separator`);
   }
 }
@@ -486,7 +491,8 @@ export default {
         private: isPrivate,
         name,
         avatar,
-        messages = []
+        messages = [],
+        notify
       }
     } = await $axios.get(`/chat/${id}`);
 
@@ -497,7 +503,8 @@ export default {
       isPrivate,
       name,
       avatar,
-      messages
+      messages,
+      notify
     };
   },
   data() {

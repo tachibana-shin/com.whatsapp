@@ -10,7 +10,7 @@
     >
       <v-app-bar-title> WhatsApp </v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn icon>
+      <v-btn icon to="/search">
         <v-icon> mdi-magnify </v-icon>
       </v-btn>
 

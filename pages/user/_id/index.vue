@@ -118,7 +118,14 @@
               <v-list-item-title> Tắt âm thông báo </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
-              <v-switch hide-details dense inset color="green-main" />
+              <v-switch
+                hide-details
+                dense
+                inset
+                color="green-main"
+                :input-value="!notify"
+                @change="notify = !$event"
+              />
             </v-list-item-action>
           </v-list-item>
           <v-divider></v-divider>
@@ -317,7 +324,8 @@ export default {
         "last-online": lastOnline,
         files,
         commonGroup,
-        "is-user": isUser
+        "is-user": isUser,
+        notify
       }
     } = await $axios.get(`/personal/${id}`);
 
@@ -330,8 +338,22 @@ export default {
       lastOnline,
       files,
       commonGroup,
-      isUser
+      isUser,
+      notify
     };
+  },
+  watch: {
+    async notify(newValue) {
+      if (newValue) {
+        await this.$axios.put(`/chat/${this.$route.params.id}/notify`, {
+          turn: true
+        });
+      } else {
+        await this.$axios.put(`/chat/${this.$route.params.id}/notify`, {
+          turn: false
+        });
+      }
+    }
   },
   methods: {
     typeofFile,

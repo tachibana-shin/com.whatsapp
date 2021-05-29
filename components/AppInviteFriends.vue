@@ -2,18 +2,18 @@
   <v-card flat color="transparent" class="text-center">
     <v-card-text>
       <div class="invite-friends font-weight-regular mt-7">Mời bạn bè</div>
-      <div class="not-contact-use font-weight-light mt-1">
+      <div class="not-contact-use mt-1">
         Không người nào trong danh bạ của bạn đang sử dụng WhatsApp. Hãy dùng
         nút bên dưới để mời họ sử dụng.
       </div>
 
       <div class="mx-3">
-        <v-btn block color="#00cc3f" class="mt-7" large max-width="300px">
+        <v-btn block color="#00cc3f" class="mt-7" dark large max-width="300px">
           Mời bạn bè
         </v-btn>
       </div>
 
-      <div class="chat-friends font-weight-light text--secondary mt-10">
+      <div class="chat-friends text--secondary mt-10">
         Chat với bạn bè sử dụng WhatsApp trên điện thoại iPhone, Android hoặc
         KaiOS.
       </div>
@@ -33,7 +33,7 @@
   font-size: 24px !important;
   font-weight: 400;
   line-height: 1.25;
-  color: #fff;
+  // color: #fff;
   //   height: 55px;
 }
 </style>
