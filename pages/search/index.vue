@@ -75,11 +75,8 @@
 </template>
 
 <script>
-import AppAvatar from "../../components/AppAvatar.vue";
-
 let timeout;
 export default {
-  components: { AppAvatar },
   meta: {
     navbar: false
   },

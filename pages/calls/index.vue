@@ -36,13 +36,3 @@
     </v-teleport>
   </v-card>
 </template>
-
-<script>
-import AppInviteFriends from "~/components/AppInviteFriends";
-
-export default {
-  components: {
-    AppInviteFriends
-  }
-};
-</script>

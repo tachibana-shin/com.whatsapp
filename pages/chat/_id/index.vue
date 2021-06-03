@@ -456,8 +456,6 @@ import typeofFile, {
 } from "~/helpers/typeofFile";
 import filesize from "filesize";
 import "file-icon-vectors/dist/file-icon-vivid.min.css";
-import AppVideo from "~/components/AppVideo";
-import AppAudio from "~/components/AppAudio";
 
 const uploader = new socketIOFileClient(socket);
 
@@ -475,9 +473,7 @@ let idMessageSend = -1;
 export default {
   components: {
     VEmojiPicker,
-    VueInfiniteLoading,
-    AppVideo,
-    AppAudio
+    VueInfiniteLoading
   },
   meta: {
     navbar: false

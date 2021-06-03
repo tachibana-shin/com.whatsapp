@@ -90,14 +90,12 @@
 
 <script>
 import { format } from "timeago.js";
-import AppAvatar from "../components/AppAvatar.vue";
 import isOnline from "~/helpers/isOnline";
 import setIOnline from "~/helpers/setIOnline";
 import setIOffline from "~/helpers/setIOffline";
 import isEmpty from "lodash.isempty";
 
 export default {
-  components: { AppAvatar },
   sockets: {
     "new chat"(chat) {
       this.list.unshift(chat);
