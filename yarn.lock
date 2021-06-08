@@ -914,14 +914,6 @@
   dependencies:
     vue "^2.5.22"
 
-"@dongido/vue-viaudio@^0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@dongido/vue-viaudio/-/vue-viaudio-0.3.5.tgz#041b3d0d82028c55381e27df33cbe0b5ec95eb4f"
-  integrity sha512-VAjt2UTTQfdl48N5vEuADUvo+ydRbbp9RvTHpgo8XhTCKeNmZxX6f1V/7pn8La4TiPAGLtKhv2iQ/MXbjF6lag==
-  dependencies:
-    core-js "^2.6.5"
-    vue "^2.6.10"
-
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.4.tgz#d4b3549a5db5de2683e0c1071ab4f140904bbf69"
@@ -1293,6 +1285,19 @@
     consola "^2.15.3"
     defu "^3.2.2"
 
+"@nuxtjs/composition-api@^0.24.4":
+  version "0.24.4"
+  resolved "https://registry.yarnpkg.com/@nuxtjs/composition-api/-/composition-api-0.24.4.tgz#2ccc47db419255c6bd573851388fc8f1cb96d938"
+  integrity sha512-WRQGVgE1MbwYVOvFeGfToOjb6w3D2lxWM54N4HMFOPmDJI9+XngJQZgtuQCBUSsEZ3a3dpejBSzSYyEC7FrdvQ==
+  dependencies:
+    "@vue/composition-api" "1.0.0-rc.11"
+    defu "^5.0.0"
+    estree-walker "^2.0.2"
+    fs-extra "^9.1.0"
+    magic-string "^0.25.7"
+    ufo "^0.7.5"
+    upath "^2.0.1"
+
 "@nuxtjs/dotenv@^1.4.1":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@nuxtjs/dotenv/-/dotenv-1.4.1.tgz#dd5abb98e22cc7ae27139d3aa606151034293128"
@@ -1514,10 +1519,10 @@
   optionalDependencies:
     prettier "^1.18.2"
 
-"@vue/composition-api@^1.0.0-rc.10":
-  version "1.0.0-rc.10"
-  resolved "https://registry.yarnpkg.com/@vue/composition-api/-/composition-api-1.0.0-rc.10.tgz#a98e2b810613531bbbbd3b4c0a9fc46198cc931d"
-  integrity sha512-ftm4OU8H1Ipw64gxIVqzlCW9lJrtr9iOJME0/KJ/fWmVGy55Qbd0uIgIttOkCdLL94A5cjTSbJFTQhu9jBDRXw==
+"@vue/composition-api@1.0.0-rc.11":
+  version "1.0.0-rc.11"
+  resolved "https://registry.yarnpkg.com/@vue/composition-api/-/composition-api-1.0.0-rc.11.tgz#fde9a56855e159eb873df3224a461898dad91c2e"
+  integrity sha512-rB5cKeNZlHdjEYre2vBzdid+e09Mf2HmMrg31NCT6c1G6bgX1CJ6V8H7owo9+wK/O2YyN9AEkIVLOczP9s0VTQ==
   dependencies:
     tslib "^2.2.0"
 
@@ -3072,6 +3077,11 @@ defu@^3.2.2:
   resolved "https://registry.yarnpkg.com/defu/-/defu-3.2.2.tgz#be20f4cc49b9805d54ee6b610658d53894942e97"
   integrity sha512-8UWj5lNv7HD+kB0e9w77Z7TdQlbUYDVWqITLHNqFIn6khrNHv5WQo38Dcm1f6HeNyZf0U7UbPf6WeZDSdCzGDQ==
 
+defu@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/defu/-/defu-5.0.0.tgz#5768f0d402a555bfc4c267246b20f82ce8b5a10b"
+  integrity sha512-VHg73EDeRXlu7oYWRmmrNp/nl7QkdXUxkQQKig0Zk8daNmm84AbGoC8Be6/VVLJEKxn12hR0UBmz8O+xQiAPKQ==
+
 depd@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
@@ -3413,6 +3423,11 @@ estraverse@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-5.2.0.tgz#307df42547e6cc7324d3cf03c155d5cdb8c53880"
   integrity sha512-BxbNGGNm0RyRYvUdHpIwv9IWzeM9XClbOxwoATuFdOE7ZE6wHL+HQ5T8hoPM+zHvmKzzsEqhgy0GrQ5X13afiQ==
+
+estree-walker@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
+  integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
 
 esutils@^2.0.2:
   version "2.0.3"
@@ -4836,6 +4851,13 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
+magic-string@^0.25.7:
+  version "0.25.7"
+  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.25.7.tgz#3f497d6fd34c669c6798dcb821f2ef31f5445051"
+  integrity sha512-4CrMT5DOHTDk4HYDlzmwu4FVCcIYI8gauveasrdCu2IKIFOJ3f0v/8MDGJCDL9oD2ppz/Av1b0Nj345H9M+XIA==
+  dependencies:
+    sourcemap-codec "^1.4.4"
+
 make-dir@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-1.3.0.tgz#79c1033b80515bd6d24ec9933e860ca75ee27f0c"
@@ -4996,7 +5018,7 @@ mime-types@^2.1.19, mime-types@^2.1.27, mime-types@^2.1.28, mime-types@~2.1.24:
   dependencies:
     mime-db "1.47.0"
 
-mime@1.6.0, mime@^1.3.4:
+mime@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
@@ -6554,6 +6576,11 @@ randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   dependencies:
     safe-buffer "^5.1.0"
 
+randomcolor@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/randomcolor/-/randomcolor-0.6.2.tgz#7a57362ae1a1278439aeed2c15e5deb8ea33f56d"
+  integrity sha512-Mn6TbyYpFgwFuQ8KJKqf3bqqY9O1y37/0jgSK/61PUxV4QfIMv0+K2ioq8DfOjkBslcjwSzRfIDEXfzA9aCx7A==
+
 randomfill@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/randomfill/-/randomfill-1.0.4.tgz#c92196fc86ab42be983f1bf31778224931d61458"
@@ -7128,13 +7155,6 @@ socket.io-file-client@^2.0.2:
   resolved "https://registry.yarnpkg.com/socket.io-file-client/-/socket.io-file-client-2.0.2.tgz#6aec6f544ae0358b600cc9a14dd62034c2a9911b"
   integrity sha512-IoQUfkJaFAlFvf/CbrZa4HMwMCszWf8xt5fT9okcmhOLyKVV+rjtZr8E+tiOENIiDjnR1Y99ud/+Iv2vtXrUow==
 
-socket.io-file@^2.0.31:
-  version "2.0.31"
-  resolved "https://registry.yarnpkg.com/socket.io-file/-/socket.io-file-2.0.31.tgz#7b2a3f5e2d5dee4ce35535f9d2d2b7a0ac1afcf3"
-  integrity sha512-88rkraeHlnxrcMb08zNjAv4pVZXXmGIcPM9V5KsxBOCVTZ9g+l2m/msYnPCU7GGvFBXM5ilzEe63d8VuKNIevA==
-  dependencies:
-    mime "^1.3.4"
-
 socket.io-parser@~4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/socket.io-parser/-/socket.io-parser-4.0.4.tgz#9ea21b0d61508d18196ef04a2c6b9ab630f4c2b0"
@@ -7206,6 +7226,11 @@ source-map@^0.7.3, source-map@~0.7.2:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.3.tgz#5302f8169031735226544092e64981f751750383"
   integrity sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
+
+sourcemap-codec@^1.4.4:
+  version "1.4.8"
+  resolved "https://registry.yarnpkg.com/sourcemap-codec/-/sourcemap-codec-1.4.8.tgz#ea804bd94857402e6992d05a38ef1ae35a9ab4c4"
+  integrity sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==
 
 split-on-first@^1.0.0:
   version "1.1.0"
@@ -7705,6 +7730,11 @@ ufo@^0.6.10:
   resolved "https://registry.yarnpkg.com/ufo/-/ufo-0.6.11.tgz#69311ed4abc8ab671c83754b79ce0d396fea1075"
   integrity sha512-Yu7TJThwlr23peOkX/+hm6LfkyBs+eDWV880468PTrjKBKjjsNWFFwIuOqDfmXngRo9TZ4+twFYueRH0OLl0Gw==
 
+ufo@^0.7.5:
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/ufo/-/ufo-0.7.5.tgz#5d5b2174747c0072edd30501994c8ac4ad2e77ea"
+  integrity sha512-FGG+EgguC1oz5dTE1JptPWCyj6Z9mYpwvZY8PTu9Vh/Aoy+Mj9cpeQ3gg4kyEMDbMrH+lTYiw7bomG58B8X7Kg==
+
 uglify-js@^3.5.1:
   version "3.13.5"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.13.5.tgz#5d71d6dbba64cf441f32929b1efce7365bb4f113"
@@ -8031,14 +8061,7 @@ vue-timeago.js@^0.0.1:
   dependencies:
     timeago.js "^4.0.2"
 
-vue-web-cam@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/vue-web-cam/-/vue-web-cam-1.9.0.tgz#5a27ed21ca3c7272fbbf170e07b26951a515a93f"
-  integrity sha512-AyEo8WWHpQGvMgWrxV6NFB6L6ojf85iTt8SeBokobYsr+Ev3qHKzR/L9C1aeW+lQ3+PSuRVUK9dVKHWkIiK+vA==
-  dependencies:
-    vue "^2.6.10"
-
-vue@^2.5.22, vue@^2.6.10, vue@^2.6.12:
+vue@^2.5.22, vue@^2.6.12:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.12.tgz#f5ebd4fa6bd2869403e29a896aed4904456c9123"
   integrity sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg==
@@ -8056,11 +8079,6 @@ vuetify-toast2@^0.0.1-b6:
   version "0.0.1-b6"
   resolved "https://registry.yarnpkg.com/vuetify-toast2/-/vuetify-toast2-0.0.1-b6.tgz#d254b66b3f5c4887759a1ef1d658a1ef3b333003"
   integrity sha512-+0g63eOXRxlnKT7E4523wb5urCMkWmpXVv9aHHby2NKmUX9ckuM7d6Qe16qElOofUUi97Y0pHp6j4eJmIGsu2Q==
-
-vuetify-toast@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/vuetify-toast/-/vuetify-toast-0.1.1.tgz#7de473a3d9d84d9ad0e2cf7b0349c7c15f1d5cf4"
-  integrity sha512-cloebj2/TsGLd9U6XEJIF/Z2+hz/PDcdqv2XjTAIvPje81wd7Jsg30ltaAt5yfXuFZNpNffefZ2fZQcFH18kCw==
 
 vuetify@^2.4.2:
   version "2.4.11"

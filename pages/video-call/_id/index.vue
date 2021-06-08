@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import Peer from "peerjs"
+// import Peer from "peerjs"
 /**
  * @WAITNG : waiting for reply;
  * @NO_ASWER : no answer;

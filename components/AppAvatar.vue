@@ -14,7 +14,9 @@
     :value="online"
   >
     <v-avatar :size="size" :to="!!to ? to : undefined">
-      <v-img style="background-color: #000" :src="src"> </v-img>
+      <v-img style="background-color: #000" :src="src">
+        <slot name="default" />
+      </v-img>
     </v-avatar>
   </v-badge>
 </template>

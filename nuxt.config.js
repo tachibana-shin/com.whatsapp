@@ -5,6 +5,9 @@ export default {
     port: 8080,
     host: "0.0.0.0"
   },
+  loading: {
+    color: "#ffffff"
+  },
   router: {
     middleware: ["meta", "auth"]
   },
@@ -32,7 +35,8 @@ export default {
     "~/plugins/vuetify-toast2",
     "~/plugins/nuxt-axios",
     { src: "~/plugins/vue-socket.io-extended", ssr: false },
-    "~/plugins/vue-timeago.js.js"
+    "~/plugins/vue-timeago.js",
+    "~/plugins/vue-fittext"
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -40,17 +44,13 @@ export default {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
+    // "@nuxtjs/composition-api/module",
     // https://go.nuxtjs.dev/vuetify
     "@nuxtjs/vuetify"
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: [
-    "@nuxtjs/dotenv",
-    "vue-web-cam/nuxt",
-    "@nuxtjs/axios",
-    "@nuxtjs/auth-next"
-  ],
+  modules: ["@nuxtjs/dotenv", "@nuxtjs/axios", "@nuxtjs/auth-next"],
 
   axios: {
     baseURL: `${process.env.API_URL}`,

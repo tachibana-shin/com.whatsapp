@@ -10,11 +10,11 @@
         :src="avatar"
         :online="isOnline"
         :size="37"
-        :to="`/user/${id}`"
+        :to="`/id/${id}`"
       />
       <nuxt-link
         tag="div"
-        :to="`/user/${id}`"
+        :to="`/id/${id}`"
         class="ml-3 my-n1 d-flex flex-column justify-center"
         style="max-width: 300px; width: 100%; height: 100%; padding: 4px 0"
         v-ripple
@@ -77,11 +77,11 @@
           </template>
 
           <v-list>
-            <v-list-item :to="`/user/${id}`">
+            <v-list-item :to="`/${id}`">
               <v-list-item-title>Xem người liên hệ</v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title :to="`/user/${id}/media`"
+              <v-list-item-title :to="`/${id}/media`"
                 >Tệp phương tiện, liên kết và tài liệu</v-list-item-title
               >
             </v-list-item>
@@ -162,7 +162,7 @@
           ref="message"
         >
           <div class="message--inner">
-            <div class="sender" v-if="isend === false">
+            <div class="sender" v-if="isend === false && isPrivate === false">
               {{ getNameSender(sender) }}
             </div>
             <section
@@ -370,7 +370,7 @@
             <v-btn
               icon
               class="icon"
-              v-show="!messageReal"
+              v-show="!message"
               key="2"
               @click="sendFiles(`image/*`, false)"
             >
@@ -378,27 +378,16 @@
             </v-btn>
           </transition-group>
 
-          <div class="textarea order-1" id="textarea">
-            <div
-              class="textarea__inner"
-              contenteditable
-              @input="message = $event.target.innerHTML"
-              ref="textarea__inner"
-              :style="{
-                height:
-                  !!messageReal && $refs.textarea__inner
-                    ? `${$refs.textarea__inner.scrollHeight}px`
-                    : undefined
-              }"
-              @keydown.exact.enter.prevent.stop="onEnter"
-              @keydown.exact.enter.shift="onEnterShift"
-              @focus="onFocusEdit"
-              @blur="onBlurEdit"
-            ></div>
-            <label for="textarea" class="placeholder" v-show="!message">
-              Nhập tin nhắn
-            </label>
-          </div>
+          <app-textarea
+            class="order-1"
+            v-model="message"
+            fill
+            placeholder="Input message"
+            @submit="onEnter"
+            @new-line="onEnterShift"
+            @focus="onFocusEdit"
+            @blur="onBlurEdit"
+          />
         </div>
         <div class="btn--send__slot">
           <v-btn
@@ -419,10 +408,7 @@
         <v-emoji-picker
           class="emoji-picker--bottom"
           v-if="emojiPickerOn"
-          @select="
-            $refs.textarea__inner.innerHTML += $event.data;
-            message = $refs.textarea__inner.innerHTML;
-          "
+          @select="message += $event.data"
         ></v-emoji-picker>
       </client-only>
     </div>
@@ -459,13 +445,6 @@ import "file-icon-vectors/dist/file-icon-vivid.min.css";
 
 const uploader = new socketIOFileClient(socket);
 
-function setParagrapToBr() {
-  try {
-    document.execCommand("defaultParagraphSeparator", false, "br");
-  } catch {
-    console.warn(`Browser not support default-paragraph-separator`);
-  }
-}
 let onScroll;
 
 let idMessageSend = -1;
@@ -511,19 +490,6 @@ export default {
     };
   },
   computed: {
-    messageReal() {
-      const message = decodeURIComponent(
-        this.message.replace(/<\/? ?br>/gi, "\n")
-      )
-        .replace(/\&[^\s;]{1,};/g, template => {
-          const div = document.createElement("div");
-          div.innerHTML = template;
-
-          return div.innerText;
-        })
-        .replace(/^\s+|\s+$/g, "");
-      return message;
-    },
     isOnline() {
       return isOnline(this.members);
     },
@@ -625,14 +591,11 @@ export default {
     filesize,
     onFocusEdit() {
       this.$socket.client.emit("focused", this.id);
-      console.log("focused");
     },
     onBlurEdit() {
       this.$socket.client.emit("blured", this.id);
-      console.log("blured");
     },
     onEnter(event) {
-      event.preventDefault();
       this.sendMessage();
     },
     onEnterShift(event) {},
@@ -671,7 +634,7 @@ export default {
       });
     },
     sendMessage() {
-      const message = this.messageReal;
+      const message = this.message;
 
       if (message) {
         const uid = ++idMessageSend;
@@ -682,7 +645,6 @@ export default {
 
         this.$socket.client.emit("send message", this.id, message, uid);
 
-        this.$refs.textarea__inner.innerHTML = "";
         this.message = "";
       }
 
@@ -804,7 +766,6 @@ export default {
     onScroll = null;
   },
   mounted() {
-    setParagrapToBr();
     this.toEndPage();
     uploader.on("start", function(fileInfo) {
       console.log("Start uploading", fileInfo);
@@ -1126,57 +1087,6 @@ $width-triangle: 10px;
       height: 47px;
       margin-top: auto;
       margin-bottom: 0;
-    }
-
-    .textarea {
-      min-height: 32px;
-      max-height: 137px;
-      flex: 0 0 1;
-      width: 100%;
-      position: relative;
-      z-index: 1;
-      color: #000;
-      padding: {
-        top: 7.5px;
-        bottom: 7.5px;
-      }
-
-      &__inner {
-        width: 100%;
-        height: 100%;
-        outline: none;
-        overflow: hidden auto;
-        word-wrap: break-word;
-        min-height: (32px - 7.5 * 2);
-        max-height: (137px - 7.5 * 2);
-
-        &::-webkit-scrollbar-track {
-          box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-          background-color: #f5f5f5;
-          border-radius: 5px;
-        }
-
-        &::-webkit-scrollbar {
-          width: 5px;
-          background-color: #f5f5f5;
-          border-radius: 5px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background-color: #000000;
-          border: 2px solid #555555;
-          border-radius: 5px;
-        }
-      }
-      .placeholder {
-        color: #a5a5a5;
-        position: absolute;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        pointer-events: none;
-        user-select: none;
-      }
     }
   }
   .btn--send__slot {

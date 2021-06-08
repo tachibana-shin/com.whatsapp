@@ -5,6 +5,7 @@
     width="100%"
     max-width="450px"
     :loading="loading"
+    flat
   >
     <template v-slot:progress>
       <v-progress-linear
@@ -18,7 +19,7 @@
 
     <v-card-text class="font-weight-regular mx-auto fill-height pb-0">
       <v-avatar class="d-block mx-auto" size="90px">
-        <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg"></v-img>
+        <v-img :src="require(`~/assets/icon.png`)"></v-img>
       </v-avatar>
 
       <h1 class="text-body-1 font-weight-regular text-center">
@@ -26,7 +27,7 @@
       </h1>
     </v-card-text>
 
-    <v-stepper v-model="step" alt-labels style="background-color: transparent">
+    <v-stepper v-model="step" alt-labels style="box-shadow: none" flat>
       <v-stepper-items>
         <v-stepper-content step="1">
           <v-card-text class="font-weight-regular mx-auto fill-height">
@@ -37,6 +38,7 @@
                   prepend-icon="mdi-account"
                   required
                   type="text"
+                  name="name"
                   :rules="[rules.required]"
                   v-model="name"
                   autocomplete="false"
@@ -46,6 +48,7 @@
                   label="E-mail"
                   prepend-icon="mdi-email-outline"
                   type="email"
+                  name="Username"
                   required
                   :rules="[rules.required, rules.email]"
                   v-model="email"
@@ -55,6 +58,7 @@
                   label="Password"
                   prepend-icon="mdi-lock-outline"
                   required
+                  name="password"
                   :rules="[rules.required]"
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                   :type="showPassword ? 'text' : 'password'"
@@ -65,7 +69,7 @@
               </div>
 
               <div class="mx-1 mt-4 text-right">
-                <v-btn max-width="300px" color="green-main" type="submit">
+                <v-btn max-width="300px" color="green-main" type="submit" dark>
                   Next
                 </v-btn>
               </div>
@@ -73,7 +77,7 @@
 
             <div
               style="margin-top: 14px"
-              class="text-center text-caption font-weight-light text--secondary"
+              class="text-center text-caption text--secondary"
             >
               Có tài khoản? Login
             </div>
@@ -96,7 +100,7 @@
             </div>
 
             <div class="mx-1 mt-4 text-right">
-              <v-btn max-width="300px" color="green-main" type="submit">
+              <v-btn max-width="300px" color="green-main" type="submit" dark>
                 Done
               </v-btn>
             </div>
@@ -104,9 +108,12 @@
         </v-stepper-content>
       </v-stepper-items>
 
-      <v-stepper-header>
+      <v-stepper-header class="d-flex flex-nowrap">
         <v-stepper-step :complete="step > 1" step="1">
           Send OTP
+        </v-stepper-step>
+        <v-stepper-step :complete="step > 2" step="2">
+          Complete
         </v-stepper-step>
       </v-stepper-header>
     </v-stepper>

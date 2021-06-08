@@ -18,7 +18,7 @@
         ></v-img>
       </template>
 
-      <v-btn icon>
+      <v-btn icon @click="$router.back()">
         <v-icon> mdi-arrow-left </v-icon>
       </v-btn>
 
@@ -87,11 +87,11 @@
                 v-else-if="typeofFile(file) === `video`"
                 width="100%"
               >
-                <video
+                <app-video
                   :src="file.src"
                   style="width: 72px; display: block"
                   controls
-                ></video>
+                ></app-video>
               </v-responsive>
               <audio
                 v-else-if="typeofFile(file) === `audio`"
@@ -183,124 +183,172 @@
         </v-list>
       </v-card>
 
-      <v-card class="mt-4">
-        <v-list>
-          <div class="green-main--text px-3 pt-2">
-            Giới thiệu và số điện thoại
-          </div>
+      <template v-if="isUser">
+        <v-card class="mt-4">
+          <v-list>
+            <div class="green-main--text px-3 pt-2">
+              Giới thiệu và số điện thoại
+            </div>
 
-          <v-list-item>
-            <v-list-item-content>
-              {{ description }}
-            </v-list-item-content>
-          </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>
-                +84 39 414 6080
-              </v-list-item-title>
-              <v-list-item-subtitle> Di Động </v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <div>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-message-reply-text </v-icon>
-                </v-btn>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-phone </v-icon>
-                </v-btn>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-video </v-icon>
-                </v-btn>
-              </div>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-      </v-card>
+            <v-list-item>
+              <v-list-item-content>
+                {{ description }}
+              </v-list-item-content>
+            </v-list-item>
+            <v-divider></v-divider>
+            <v-list-item v-if="phone">
+              <v-list-item-content>
+                <v-list-item-title> +{{ phone }} </v-list-item-title>
+                <v-list-item-subtitle> Di Động </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <div>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-message-reply-text </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-phone </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-video </v-icon>
+                  </v-btn>
+                </div>
+              </v-list-item-action>
+            </v-list-item>
+            <v-list-item v-if="email">
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ email }}
+                </v-list-item-title>
+                <v-list-item-subtitle> E-mail </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <div>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-message-reply-text </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-phone </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-video </v-icon>
+                  </v-btn>
+                </div>
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
-      <v-card class="mt-4">
-        <v-list>
-          <div class="green-main--text px-3 pt-2">
-            Các nhóm chung
-          </div>
-          <v-list-item v-for="(group, index) in commonGroup" :key="index">
-            <v-list-item-avatar>
-              <v-img :src="group.avatar" style="background-color: #000"></v-img>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title>
-                {{ group.name }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{
-                  group.members
-                    .map(item =>
-                      item._id === $auth.user._id ? "Bạn" : item.name
-                    )
-                    .join(", ")
-                }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-card>
+        <v-card class="mt-4" v-if="commonGroup.length > 0">
+          <v-list>
+            <div class="green-main--text px-3 pt-2">
+              Các nhóm chung
+            </div>
+            <v-list-item v-for="(group, index) in commonGroup" :key="index">
+              <v-list-item-avatar>
+                <v-img
+                  :src="group.avatar"
+                  style="background-color: #000"
+                ></v-img>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ group.name }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{
+                    ["Bạn"]
+                      .concat(group.members.map(item => item.name))
+                      .join(", ")
+                  }}
+                  <template v-if="group[`count-members`] > 3">
+                    và {{ group[`count-members`] - 4 }} người khác
+                  </template>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
-      <v-card class="mt-4">
-        <v-list>
-          <div class="green-main--text px-3 pt-2">
-            Điện thoại khác
-          </div>
+        <v-card class="mt-4">
+          <v-list>
+            <div class="green-main--text px-3 pt-2">
+              Điện thoại khác
+            </div>
 
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title>
-                +84 39 414 6080
-              </v-list-item-title>
-              <v-list-item-subtitle> Di Động </v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <div>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-message-reply-text </v-icon>
-                </v-btn>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-phone </v-icon>
-                </v-btn>
-                <v-btn icon color="green-main">
-                  <v-icon> mdi-video </v-icon>
-                </v-btn>
-              </div>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-      </v-card>
+            <v-list-item v-if="phone">
+              <v-list-item-content>
+                <v-list-item-title> +{{ phone }} </v-list-item-title>
+                <v-list-item-subtitle> Di Động </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <div>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-message-reply-text </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-phone </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-video </v-icon>
+                  </v-btn>
+                </div>
+              </v-list-item-action>
+            </v-list-item>
+            <v-list-item v-if="email">
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ email }}
+                </v-list-item-title>
+                <v-list-item-subtitle> E-mail </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <div>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-message-reply-text </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-phone </v-icon>
+                  </v-btn>
+                  <v-btn icon color="green-main">
+                    <v-icon> mdi-video </v-icon>
+                  </v-btn>
+                </div>
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
-      <v-card class="mt-4">
-        <v-list class="pa-0">
-          <v-list-item class="red--text text--lighten-1">
-            <v-list-item-icon>
-              <v-icon> mdi-block-helper </v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title> Chặn </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-card>
+        <v-card class="mt-4">
+          <v-list class="pa-0">
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon color="error"> mdi-block-helper </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title class="error--text">
+                  Chặn
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
 
-      <v-card class="mt-4">
-        <v-list class="pa-0">
-          <v-list-item class="red--text text--lighten-1">
-            <v-list-item-icon>
-              <v-icon> mdi-thumb-down </v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title> Báo cáo người liên hệ </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-card>
+        <v-card class="mt-4">
+          <v-list class="pa-0">
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon color="error"> mdi-thumb-down </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title class="error--text">
+                  Báo cáo người liên hệ
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </template>
     </div>
   </v-row>
 </template>
@@ -325,7 +373,9 @@ export default {
         files,
         commonGroup,
         "is-user": isUser,
-        notify
+        notify,
+        phone,
+        email
       }
     } = await $axios.get(`/personal/${id}`);
 
@@ -339,7 +389,9 @@ export default {
       files,
       commonGroup,
       isUser,
-      notify
+      notify,
+      phone,
+      email
     };
   },
   watch: {
